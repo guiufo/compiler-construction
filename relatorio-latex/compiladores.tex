@@ -1,0 +1,480 @@
+\documentclass[12pt,a4paper,twoside]{report}
+% -------------------------------------------------------------------- %
+% Pacotes
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage[fixlanguage]{babelbib}
+\usepackage[pdftex]{graphicx}      % usamos arquivos pdf/png como figuras
+\usepackage{setspace}              % espaçamento flexvel
+\usepackage{indentfirst}           % indentação do primeiro parágrafo
+\usepackage{makeidx}               % índice remissivo
+\usepackage[nottoc]{tocbibind}     % acrescentamos a bibliografia/indice/conteudo no Table of Contents
+\usepackage{courier}               % usa o Adobe Courier no lugar de Computer Modern Typewriter
+\usepackage{type1cm}               % fontes realmente escaláveis
+\usepackage{titletoc}
+\usepackage{ucs}
+\usepackage[font=small,format=plain,labelfont=bf,up,textfont=it,up]{caption}
+\usepackage[usenames,svgnames,dvipsnames]{xcolor}
+\usepackage[a4paper,top=2.54cm,bottom=2.0cm,left=2.0cm,right=2.54cm]{geometry} % margens
+\usepackage{amsmath} 
+
+\usepackage[pdftex,plainpages=false,pdfpagelabels,pagebackref,colorlinks=true,citecolor=DarkGreen,
+linkcolor=NavyBlue,urlcolor=DarkRed,filecolor=green,bookmarksopen=true]{hyperref} % links coloridos
+\usepackage[all]{hypcap}                % soluciona o problema com o hyperref e capítulos
+\usepackage[square,sort,nonamebreak,comma]{natbib}  % citação bibliográfica alpha
+\fontsize{60}{62}\usefont{OT1}{cmr}{m}{n}{\selectfont}
+\usepackage{upquote}                    % formata apóstrofes '
+\usepackage{textcomp}
+
+% Para formatar corretamente as URLs
+\usepackage{url}
+% -------------------------------------------------------------------- %
+% Cabeçalhos similares ao TAOCP de Donald E. Knuth
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\chaptermark}[1]{\markboth{\MakeUppercase{#1}}{}}
+\renewcommand{\sectionmark}[1]{\markright{\MakeUppercase{#1}}{}}
+\renewcommand{\headrulewidth}{0pt}
+
+% -------------------------------------------------------------------- %
+\graphicspath{{./imagens/}}        % caminho das figuras
+\frenchspacing                     % arruma o espaço: id est (i.e.) e exempli gratia (e.g.)
+\urlstyle{same}                    % URL com o mesmo estilo do texto e no mono-spaced
+\makeindex                         % para o índice remissivo
+\raggedbottom                      % para no permitir espaços extras no texto
+\fontsize{60}{62}\usefont{OT1}{cmr}{m}{n}{\selectfont}
+\cleardoublepage
+\normalsize
+
+% -------------------------------------------------------------------- %
+% Cores para formatação de código
+\usepackage{color}
+\definecolor{vermelho}{rgb}{0.6,0,0} % para strings
+\definecolor{verde}{rgb}{0.25,0.5,0.35} % para comentários
+\definecolor{roxo}{rgb}{0.5,0,0.35} % para palavras-chaves
+\definecolor{azul}{rgb}{0.25,0.35,0.75} % para strings
+\definecolor{cinza-claro}{gray}{0.95}
+% -------------------------------------------------------------------- %
+% Opções de listagem usados para o código fonte
+% Ref: http://en.wikibooks.org/wiki/LaTeX/Packages/Listings
+
+
+
+\usepackage{listings}           % para formatar código-fonte (ex. em Java)
+
+
+\lstset{ %
+language=[Objective]Caml,  % seleciona a linguagem do código (aqui em lstlang0.sty
+basicstyle=\footnotesize\ttfamily, % o tamanho da fonte usado no código
+commentstyle=\color{verde}\bfseries,  % formatação de comentários
+stringstyle=\color{azul},    % formatação de strings
+upquote=true,
+numbers=left,                   % onde colocar os números de linha
+numberstyle=\tiny,  % o tamanho da fonte usada para a numeração das linhas
+stepnumber=1,                   % o intervalo entre dois números de linhas. Se for 1, numera cada uma.
+numbersep=5pt,                  % how far the line-numbers are from the code
+showspaces=false,               % show spaces adding particular underscores
+showstringspaces=false,         % underline spaces within strings
+showtabs=false,                 % show tabs within strings adding particular underscores
+keywordstyle=\color{roxo}\bfseries,
+keywordstyle=[1]\color{roxo}\bfseries,
+keywordstyle=[2]\color{verde}\bfseries,
+%        keywordstyle=[3]\textbf,    %
+%        keywordstyle=[4]\textbf,   \sqrt{\sqrt{}} %
+frame=b,                   % adds a frame around the code
+framerule=0.6pt,
+tabsize=2,                      % sets default tabsize to 2 spaces
+captionpos=t,                   % sets the caption-position to top
+breaklines=true,                % sets automatic line breaking
+breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+escapeinside={\%*}{*)},         % if you want to add a comment within your code
+backgroundcolor=\color[rgb]{1.0,1.0,1.0}, % choose the background color.
+rulecolor=\color[rgb]{0.8,0.8,0.8},
+extendedchars=true,
+xleftmargin=10pt,
+xrightmargin=10pt,
+framexleftmargin=10pt,
+framexrightmargin=10pt,
+literate={â}{{\^{a}}}1  % para formatar corretamente os acentos do Português ao usar utf8
+    {ê}{{\^{e}}}1
+    {ô}{{\^{o}}}1  
+    {Â}{{\^{A}}}1
+    {Ê}{{\^{E}}}1
+    {Ô}{{\^{O}}}1
+    {á}{{\'{a}}}1
+    {é}{{\'{e}}}1
+    {í}{{\'{i}}}1
+    {ó}{{\'{o}}}1
+    {ú}{{\'{u}}}1
+    {Á}{{\'{A}}}1
+    {É}{{\'{E}}}1
+    {Í}{{\'{I}}}1
+    {Ó}{{\'{O}}}1
+    {Ú}{{\'{U}}}1
+    {à}{{\`{a}}}1
+    {À}{{\`{A}}}1
+    {ã}{{\~{a}}}1
+    {õ}{{\~{o}}}1
+    {Ã}{{\~{A}}}1
+    {Õ}{{\~{O}}}1
+    {ç}{{\c{c}}}1
+    {Ç}{{\c{C}}}1
+    {ü}{{\"u}}1
+    {Ü}{{\"U}}1
+}
+
+\renewcommand{\lstlistingname}{Listagem}
+\renewcommand{\lstlistlistingname}{Lista de Listagens}
+
+% Definição de novos estilos
+\lstdefinestyle{Bash}
+    {language=bash,frame=single,numbers=none,basicstyle=\footnotesize\ttfamily,
+     morekeywords={cp,mkdir,sudo,tar}}
+
+% Definição de novos ambientes
+\lstnewenvironment{terminal}
+  {\lstset{style=Bash}}
+  {}
+
+\lstnewenvironment{ocaml}
+  {\lstset{basicstyle=\scriptsize\ttfamily,
+           frame=single,
+           frameround=tttt,
+           framerule=2pt,
+           numbers=none,
+           rulecolor=\color{Salmon}}}
+  {}
+
+\lstnewenvironment{xml}
+   {\lstset{language=XML,frame=single,numbers=none}}
+   {}
+
+\lstnewenvironment{interprete}
+  {\lstset{frame=single,
+            frameround=tttt,
+            numbers=none,
+            basicstyle=\ttfamily,
+            framerule=2pt,
+            rulecolor=\color{CadetBlue}}}
+  {}
+% Formata o caption da listagem
+% \DeclareCaptionFont{blue}{\color{blue}} 
+
+% \captionsetup[lstlisting]{singlelinecheck=false, labelfont={blue}, textfont={blue}}
+\usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox[cmyk]{0.43, 0.35, 0.35,0.01}{\parbox{\textwidth}{\hspace{15pt}#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white, singlelinecheck=false, margin=0pt, font={bf,footnotesize}}
+
+\newcommand{\ListingsPath}{./codigos}
+% Inclui o nome do arquivo como Caption 
+\newcommand{\filelisting}[2][]{%
+    \lstinputlisting[caption={\texttt{\detokenize{#2}}},#1]{\ListingsPath/#2}%
+}
+
+% ---------------------------------------------------------------------------- %
+
+% ---------------------------------------------------------------------------- %
+
+\title{Construção de um compilador de Portugol para Dalvik usando Objective Caml}
+\date{}
+\author{Guilherme F. O. Martini \\
+\texttt{\small \url{guiufo@gmail.com}}\\
+\vspace{1cm} \\
+Faculdade de Computação \\
+Universidade Federal de Uberlândia
+}
+\date{\today}
+
+%\includeonly{cap-clojure,magical,short}
+\begin{document}
+  \maketitle
+% -------------------------------------------------------------------- %
+% Listas de figuras, tabelas e códigos criadas automaticamente
+\listoffigures            
+\listoftables            
+\lstlistoflistings
+% -------------------------------------------------------------------- %
+
+% -------------------------------------------------------------------- %
+% Sumário
+\tableofcontents    
+
+% Capítulos do trabalho
+
+% cabeçalho para as páginas de todos os capítulos
+\fancyhead[RE,LO]{\thesection}
+
+%\singlespacing              % espaçamento simples
+\setlength{\parskip}{0.15in} % espaçamento entre paragráfos
+
+\chapter{Introdução}
+Este trabalho possui o objetivo de documentar a construção de um compilador
+de Portugol para Dalvik, uma máquina virtual para Android baseada na JVM.
+Dalvik foi descontinuado e é parte integral das versões Android até 4.4 (KitKat),
+que também contém uma versão beta do ART (Android Runtime).
+A partir do Android 5, Dalvik foi completamente substituído pelo ART.
+\section{Ambiente, Assembler e Disassembler}
+
+Este trabalho foi realizado utilizando GNU/Linux Mint 18 64 Bits.
+Esse sistema é baseado em Ubuntu, portanto todos os repositórios e comandos
+de instalação são equivalentes nos dois sistemas.
+
+Para o Portugol foi utilizado o PortugolStudio versão 2, disponível em
+\url{http://lite.acad.univali.br/portugol/}. Para instalar devemos descompactar
+o arquivo baixado, alterar as permissões do arquivo de instalação e executá-lo.
+
+\begin{terminal}
+> chmod 755 portugol-studio.2.6.1.linux.x64/ps-2.6-linux-x64.run
+> sudo ./portugol-studio.2.6.1.linux.x64/ps-2.6-linux-x64.run
+\end{terminal}
+
+Este processo irá instalar o portugol-studio e portugol-console.
+
+Dalvik utiliza a linguagem Smali como assembler. Uma linguagem baseada
+em Jasmin, que é um assembler para a JVM. Smali gera arquivos .dex, que
+podem ser executados na VM de um dispositivo Android, emulado ou real.
+
+Outra ferramenta útil é o Backsmali, que transforma arquivos .dex em
+arquivos .smali. Smali e Backsmali se encontram na versão 2.2.1 em Agosto de 2017,
+e podem ser baixados em formato .jar em \url{https://bitbucket.org/JesusFreke/smali/downloads/.}.
+
+Considere um programa "Hello World!" para Smali:
+
+% Programa "Hello World!" para Smali
+\lstinputlisting[label={arq:HelloWorld.smali}, language=Java,
+caption={HelloWorld.smali}]{codigos/Smali/HelloWorld.smali}
+
+Para gerarmos um arquivo .dex:
+\begin{terminal}
+> java -jar smali.jar assemble HelloWorld.smali -o HelloWorld.dex
+\end{terminal}
+
+Para decompilar o arquivo .dex gerado para a pasta "out":
+\begin{terminal}
+> java -jar baksmali.jar disassemble HelloWorld.dex
+\end{terminal}
+
+Para executar um arquivo .dex é necessário entrar no AndroidStudio,
+criar um dispositivo virtual com Android 4.4 ou menor e então iniciar o dispositivo.
+Daí podemos executar os seguintes comandos (adb espera um arquivo classes.dex):
+\begin{terminal}
+> zip HelloWorld.zip classes.dex
+> adb push HelloWorld.zip /data/local
+> adb shell dalvikvm -cp /data/local/HelloWorld.zip HelloWorld
+Hello World!
+\end{terminal}
+
+\section{Códigos de programas}
+Listagem de programas Portugol e respectivas traduções para Smali:
+\begin{enumerate}
+% Nano01
+\item nano01.por
+\lstinputlisting[label={arq:nano01.por}, language=Java,
+caption={nano01.por}]{codigos/Portugol/nano01.por}
+
+\item Nano01.smali
+\lstinputlisting[label={arq:Nano01.smali}, language=Java,
+caption={Nano01.smali}]{codigos/Smali/Nano01.smali}
+
+% Nano02
+\item nano02.por
+\lstinputlisting[label={arq:nano02.por}, language=Java,
+caption={nano02.por}]{codigos/Portugol/nano02.por}
+
+\item Nano02.smali
+\lstinputlisting[label={arq:Nano02.smali}, language=Java,
+caption={Nano02.smali}]{codigos/Smali/Nano01.smali}
+
+% Nano03
+\item nano03.por
+\lstinputlisting[label={arq:nano03.por}, language=Java,
+caption={nano03.por}]{codigos/Portugol/nano03.por}
+
+\item Nano03.smali
+\lstinputlisting[label={arq:Nano03.smali}, language=Java,
+caption={Nano03.smali}]{codigos/Smali/Nano03.smali}
+
+% Nano04
+\item nano04.por
+\lstinputlisting[label={arq:nano04.por}, language=Java,
+caption={nano04.por}]{codigos/Portugol/nano04.por}
+
+\item Nano04.smali
+\lstinputlisting[label={arq:Nano04.smali}, language=Java,
+caption={Nano04.smali}]{codigos/Smali/Nano04.smali}
+
+% Nano05
+\item nano05.por
+\lstinputlisting[label={arq:nano05.por}, language=Java,
+caption={nano05.por}]{codigos/Portugol/nano05.por}
+
+\item Nano05.smali
+\lstinputlisting[label={arq:Nano05.smali}, language=Java,
+caption={Nano05.smali}]{codigos/Smali/Nano05.smali}
+
+% Nano06
+\item nano06.por
+\lstinputlisting[label={arq:nano06.por}, language=Java,
+caption={nano06.por}]{codigos/Portugol/nano06.por}
+
+\item Nano06.smali
+\lstinputlisting[label={arq:Nano06.smali}, language=Java,
+caption={Nano06.smali}]{codigos/Smali/Nano06.smali}
+
+% Nano07
+\item nano07.por
+\lstinputlisting[label={arq:nano07.por}, language=Java,
+caption={nano07.por}]{codigos/Portugol/nano07.por}
+
+\item Nano07.smali
+\lstinputlisting[label={arq:Nano07.smali}, language=Java,
+caption={Nano07.smali}]{codigos/Smali/Nano07.smali}
+
+% Nano08
+\item nano08.por
+\lstinputlisting[label={arq:nano08.por}, language=Java,
+caption={nano08.por}]{codigos/Portugol/nano08.por}
+
+\item Nano08.smali
+\lstinputlisting[label={arq:Nano08.smali}, language=Java,
+caption={Nano08.smali}]{codigos/Smali/Nano08.smali}
+
+% Nano10
+\item nano10.por
+\lstinputlisting[label={arq:nano10.por}, language=Java,
+caption={nano10.por}]{codigos/Portugol/nano10.por}
+
+\item Nano10.smali
+\lstinputlisting[label={arq:Nano10.smali}, language=Java,
+caption={Nano10.smali}]{codigos/Smali/Nano10.smali}
+
+% Nano11
+\item nano11.por
+\lstinputlisting[label={arq:nano11.por}, language=Java,
+caption={nano11.por}]{codigos/Portugol/nano12.por}
+
+\item Nano11.smali
+\lstinputlisting[label={arq:Nano11.smali}, language=Java,
+caption={Nano11.smali}]{codigos/Smali/Nano11.smali}
+
+% Nano12
+\item nano12.por
+\lstinputlisting[label={arq:nano12.por}, language=Java,
+caption={nano12.por}]{codigos/Portugol/nano12.por}
+
+\item Nano12.smali
+\lstinputlisting[label={arq:Nano12.smali}, language=Java,
+caption={Nano12.smali}]{codigos/Smali/Nano12.smali}
+
+% Micro01
+\item micro01.por
+\lstinputlisting[label={arq:micro01.por}, language=Java,
+caption={micro01.por}]{codigos/Portugol/micro01.por}
+
+\item Micro01.smali
+\lstinputlisting[label={arq:Micro01.smali}, language=Java,
+caption={Micro01.smali}]{codigos/Smali/Micro01.smali}
+
+% Micro02
+\item micro02.por
+\lstinputlisting[label={arq:micro02.por}, language=Java,
+caption={micro02.por}]{codigos/Portugol/micro02.por}
+
+\item Micro02.smali
+\lstinputlisting[label={arq:Micro02.smali}, language=Java,
+caption={Micro02.smali}]{codigos/Smali/Micro02.smali}
+
+% Micro03
+\item micro03.por
+\lstinputlisting[label={arq:micro03.por}, language=Java,
+caption={micro03.por}]{codigos/Portugol/micro03.por}
+
+\item Micro03.smali
+\lstinputlisting[label={arq:Micro03.smali}, language=Java,
+caption={Micro03.smali}]{codigos/Smali/Micro03.smali}
+
+
+% Micro04
+\item micro04.por
+\lstinputlisting[label={arq:micro04.por}, language=Java,
+caption={micro04.por}]{codigos/Portugol/micro04.por}
+
+\item Micro04.smali
+\lstinputlisting[label={arq:Micro04.smali}, language=Java,
+caption={Micro04.smali}]{codigos/Smali/Micro04.smali}
+
+
+% Micro05
+\item micro05.por
+\lstinputlisting[label={arq:micro05.por}, language=Java,
+caption={micro05.por}]{codigos/Portugol/micro05.por}
+
+\item Micro05.smali
+\lstinputlisting[label={arq:Micro05.smali}, language=Java,
+caption={Micro05.smali}]{codigos/Smali/Micro05.smali}
+
+% Micro06
+\item micro06.por
+\lstinputlisting[label={arq:micro06.por}, language=Java,
+caption={micro06.por}]{codigos/Portugol/micro06.por}
+
+\item Micro06.smali
+\lstinputlisting[label={arq:Micro06.smali}, language=Java,
+caption={Micro06.smali}]{codigos/Smali/Micro06.smali}
+
+% Micro07
+\item micro07.por
+\lstinputlisting[label={arq:micro07.por}, language=Java,
+caption={micro07.por}]{codigos/Portugol/micro07.por}
+
+\item Micro07.smali
+\lstinputlisting[label={arq:Micro07.smali}, language=Java,
+caption={Micro07.smali}]{codigos/Smali/Micro07.smali}
+
+% Micro08
+\item micro08.por
+\lstinputlisting[label={arq:micro08.por}, language=Java,
+caption={micro08.por}]{codigos/Portugol/micro08.por}
+
+\item Micro08.smali
+\lstinputlisting[label={arq:Micro08.smali}, language=Java,
+caption={Micro08.smali}]{codigos/Smali/Micro08.smali}
+
+% Micro09
+\item micro09.por
+\lstinputlisting[label={arq:micro09.por}, language=Java,
+caption={micro09.por}]{codigos/Portugol/micro09.por}
+
+\item Micro09.smali
+\lstinputlisting[label={arq:Micro09.smali}, language=Java,
+caption={Micro09.smali}]{codigos/Smali/Micro09.smali}
+
+% Micro10
+\item micro10.por
+\lstinputlisting[label={arq:micro10.por}, language=Java,
+caption={micro10.por}]{codigos/Portugol/micro10.por}
+
+\item Micro10.smali
+\lstinputlisting[label={arq:Micro10.smali}, language=Java,
+caption={Micro10.smali}]{codigos/Smali/Micro10.smali}
+
+% Micro11
+\item micro11.por
+\lstinputlisting[label={arq:micro11.por},
+caption={micro11.por}]{codigos/Portugol/micro11.por}
+
+\item Micro11.smali
+\lstinputlisting[label={arq:Micro11.smali}, language=Java,
+caption={Micro11.smali}]{codigos/Smali/Micro11.smali}
+
+\end{enumerate}
+
+\clearpage
+\addcontentsline{toc}{part}{Apêndice}
+\appendix
+
+\end{document} 

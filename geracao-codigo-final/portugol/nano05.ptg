@@ -1,0 +1,10 @@
+algoritmo "nano05"
+{
+	Programa nano05
+}
+var
+	n : inteiro;
+inicio
+	n <- 2;
+	escreva(n);
+fimalgoritmo

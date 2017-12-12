@@ -1,0 +1,7 @@
+\select@language {brazil}
+\contentsline {chapter}{Lista de Figuras}{2}{chapter*.1}
+\contentsline {chapter}{Lista de Tabelas}{3}{chapter*.2}
+\contentsline {chapter}{\numberline {1}Introdu\IeC {\c c}\IeC {\~a}o}{7}{chapter.1}
+\contentsline {section}{\numberline {1.1}Ambiente, Assembler e Disassembler}{7}{section.1.1}
+\contentsline {section}{\numberline {1.2}C\IeC {\'o}digos de programas}{8}{section.1.2}
+\contentsfinish 
