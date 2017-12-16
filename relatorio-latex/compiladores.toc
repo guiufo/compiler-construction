@@ -3,5 +3,31 @@
 \contentsline {chapter}{Lista de Tabelas}{3}{chapter*.2}
 \contentsline {chapter}{\numberline {1}Introdu\IeC {\c c}\IeC {\~a}o}{7}{chapter.1}
 \contentsline {section}{\numberline {1.1}Ambiente, Assembler e Disassembler}{7}{section.1.1}
-\contentsline {section}{\numberline {1.2}C\IeC {\'o}digos de programas}{8}{section.1.2}
+\contentsline {section}{\numberline {1.2}Arquitetura Dalvik e Dalvik Bytecode}{9}{section.1.2}
+\contentsline {subsection}{\numberline {1.2.1}Dalvik}{9}{subsection.1.2.1}
+\contentsline {subsection}{\numberline {1.2.2}Bytecode}{9}{subsection.1.2.2}
+\contentsline {chapter}{\numberline {2}Compilador}{10}{chapter.2}
+\contentsline {section}{\numberline {2.1}Arquitetura}{10}{section.2.1}
+\contentsline {section}{\numberline {2.2}Analisador L\IeC {\'e}xico}{10}{section.2.2}
+\contentsline {subsection}{\numberline {2.2.1}Apresenta\IeC {\c c}\IeC {\~a}o}{10}{subsection.2.2.1}
+\contentsline {subsection}{\numberline {2.2.2}Implementa\IeC {\c c}\IeC {\~a}o}{10}{subsection.2.2.2}
+\contentsline {subsection}{\numberline {2.2.3}Utiliza\IeC {\c c}\IeC {\~a}o}{13}{subsection.2.2.3}
+\contentsline {section}{\numberline {2.3}Analisador Sint\IeC {\'a}tico}{13}{section.2.3}
+\contentsline {subsection}{\numberline {2.3.1}Implementa\IeC {\c c}\IeC {\~a}o}{14}{subsection.2.3.1}
+\contentsline {subsection}{\numberline {2.3.2}Utiliza\IeC {\c c}\IeC {\~a}o}{16}{subsection.2.3.2}
+\contentsline {section}{\numberline {2.4}Analisador Sem\IeC {\^a}ntico}{16}{section.2.4}
+\contentsline {subsection}{\numberline {2.4.1}Implementa\IeC {\c c}\IeC {\~a}o}{16}{subsection.2.4.1}
+\contentsline {subsection}{\numberline {2.4.2}Utiliza\IeC {\c c}\IeC {\~a}o}{16}{subsection.2.4.2}
+\contentsline {section}{\numberline {2.5}Int\IeC {\'e}rprete}{16}{section.2.5}
+\contentsline {subsection}{\numberline {2.5.1}Implementa\IeC {\c c}\IeC {\~a}o}{16}{subsection.2.5.1}
+\contentsline {subsection}{\numberline {2.5.2}Utiliza\IeC {\c c}\IeC {\~a}o}{16}{subsection.2.5.2}
+\contentsline {section}{\numberline {2.6}Representa\IeC {\c c}\IeC {\~a}o Intermedi\IeC {\'a}ria}{16}{section.2.6}
+\contentsline {subsection}{\numberline {2.6.1}Implementa\IeC {\c c}\IeC {\~a}o}{16}{subsection.2.6.1}
+\contentsline {subsection}{\numberline {2.6.2}Utiliza\IeC {\c c}\IeC {\~a}o}{16}{subsection.2.6.2}
+\contentsline {section}{\numberline {2.7}Tradu\IeC {\c c}\IeC {\~a}o para bytecode}{16}{section.2.7}
+\contentsline {subsection}{\numberline {2.7.1}Implementa\IeC {\c c}\IeC {\~a}o}{16}{subsection.2.7.1}
+\contentsline {subsection}{\numberline {2.7.2}Utiliza\IeC {\c c}\IeC {\~a}o}{16}{subsection.2.7.2}
+\contentsline {chapter}{\numberline {3}C\IeC {\'o}digos}{17}{chapter.3}
+\contentsline {section}{\numberline {3.1}portugol e smali}{17}{section.3.1}
+\contentsline {chapter}{\numberline {4}Refer\IeC {\^e}ncias}{60}{chapter.4}
 \contentsfinish 

@@ -5,7 +5,9 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[brazil]{babel}
+
 \usepackage[fixlanguage]{babelbib}
+
 \usepackage[pdftex]{graphicx}      % usamos arquivos pdf/png como figuras
 \usepackage{setspace}              % espaçamento flexvel
 \usepackage{indentfirst}           % indentação do primeiro parágrafo
@@ -179,7 +181,7 @@ literate={â}{{\^{a}}}1  % para formatar corretamente os acentos do Português a
 
 % ---------------------------------------------------------------------------- %
 
-\title{Construção de um compilador de Portugol para Dalvik usando Objective Caml}
+\title{Construção de um compilador de portugol para Dalvik usando Objective Caml}
 \date{}
 \author{Guilherme F. O. Martini \\
 \texttt{\small \url{guiufo@gmail.com}}\\
@@ -213,17 +215,25 @@ Universidade Federal de Uberlândia
 
 \chapter{Introdução}
 Este trabalho possui o objetivo de documentar a construção de um compilador
-de Portugol para Dalvik, uma máquina virtual para Android baseada na JVM.
+de portugol para Dalvik, uma máquina virtual para Android baseada na JVM.
 Dalvik foi descontinuado e é parte integral das versões Android até 4.4 (KitKat),
 que também contém uma versão beta do ART (Android Runtime).
 A partir do Android 5, Dalvik foi completamente substituído pelo ART.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=10cm]{imagens/arquitetura-android}
+	\caption{Arquitetura Android}
+	\label{fig:arquitetura-android}
+\end{figure}
+
 \section{Ambiente, Assembler e Disassembler}
 
 Este trabalho foi realizado utilizando GNU/Linux Mint 18 64 Bits.
 Esse sistema é baseado em Ubuntu, portanto todos os repositórios e comandos
 de instalação são equivalentes nos dois sistemas.
 
-Para o Portugol foi utilizado o PortugolStudio versão 2, disponível em
+Para o portugol foi utilizado o portugolStudio versão 2, disponível em
 \url{http://lite.acad.univali.br/portugol/}. Para instalar devemos descompactar
 o arquivo baixado, alterar as permissões do arquivo de instalação e executá-lo.
 
@@ -234,19 +244,19 @@ o arquivo baixado, alterar as permissões do arquivo de instalação e executá-
 
 Este processo irá instalar o portugol-studio e portugol-console.
 
-Dalvik utiliza a linguagem Smali como assembler. Uma linguagem baseada
-em Jasmin, que é um assembler para a JVM. Smali gera arquivos .dex, que
+Dalvik utiliza a linguagem smali como assembler. Uma linguagem baseada
+em Jasmin, que é um assembler para a JVM. smali gera arquivos .dex, que
 podem ser executados na VM de um dispositivo Android, emulado ou real.
 
 Outra ferramenta útil é o Backsmali, que transforma arquivos .dex em
-arquivos .smali. Smali e Backsmali se encontram na versão 2.2.1 em Agosto de 2017,
+arquivos .smali. smali e Backsmali se encontram na versão 2.2.1 em Agosto de 2017,
 e podem ser baixados em formato .jar em \url{https://bitbucket.org/JesusFreke/smali/downloads/.}.
 
-Considere um programa "Hello World!" para Smali:
+Considere um programa "Hello World!" para smali:
 
-% Programa "Hello World!" para Smali
+% Programa "Hello World!" para smali
 \lstinputlisting[label={arq:HelloWorld.smali}, language=Java,
-caption={HelloWorld.smali}]{codigos/Smali/HelloWorld.smali}
+caption={HelloWorld.smali}]{codigos/smali/HelloWorld.smali}
 
 Para gerarmos um arquivo .dex:
 \begin{terminal}
@@ -268,210 +278,326 @@ Daí podemos executar os seguintes comandos (adb espera um arquivo classes.dex):
 Hello World!
 \end{terminal}
 
-\section{Códigos de programas}
-Listagem de programas Portugol e respectivas traduções para Smali:
+\section{Arquitetura Dalvik e Dalvik Bytecode}
+
+\subsection{Dalvik}
+O Dalvik é uma máquina virtual java modificada para rodar o Android. Uma das diferenças do
+Dalvik para ART é que ART usa um arquivo DEX modificado, que contém código nativo (Fig. \ref{fig:arquitetura-dalvik}).
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=10cm]{imagens/arquitetura-dalvik}
+	\caption{Arquitetura Dalvik}
+	\label{fig:arquitetura-dalvik}
+\end{figure}
+
+\subsection{Bytecode}
+A máquina virtual Dalvik é parecida com as arquiteturas reais mais comuns. As chamadas de função são ao estilo da linguagem C.  A máquina é baseada em registros e frames de tamanho fixo, e contém as seguintes
+características.
+
+\begin{enumerate}
+	\item Um frame contém os registros de um método e os metadados para a execução, como o contador de programa e a referência para o .dex que contém o método.
+	\item Um registro contém 32 bits. Um dado de 64 bits usa dois registradores de 32 bits.
+	\item Os N argumentos de um método ficam nos últimos N registros do frame do método de invocação, em ordem.
+\end{enumerate}
+
+\chapter{Compilador}
+
+\section{Arquitetura}
+Estamos construindo um compilador de portugol para Dalvik. Estamos seguindo uma arquitetura
+tradicional (Fig \ref{fig:arquitetura-compilador}). Não estamos fazendo qualquer otimização, e foi
+implementado um intérprete, que usa uma árvore sintática tipada para avaliar o código.
+Uma maneira mais adequada de implementar o intérprete seria através da análise do código de 3 endereços. Assim teríamos
+um interpretador geral, independente da linguagem fonte.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=10cm]{imagens/arquitetura-compilador}
+	\caption{Arquitetura geral de um compilador}
+	\label{fig:arquitetura-compilador}
+\end{figure}
+
+\section{Analisador Léxico}
+
+\subsection{Apresentação}
+O analisador léxico é o único elemento do compilador que analisa todo o código, caractere por caractere.
+Ele é reponsável por eliminar os espaços em branco e comentários. O analisador lê o código e retorna uma
+lista de tokens, formados pelos lexemas possíveis da linguagem fonte.
+
+\subsection{Implementação}
+
+O analisador é escrito no arquivo lexer.mll, que é compilado para lexing.ml e utilizado para gerar a lista de tokens.
+Segue o código da implementação do analisador:
+
+\lstinputlisting[label={arq:lexer.mll}, language=Caml,
+caption={lexer.mll}]{codigos/ocaml/lexer.mll}
+
+\subsection{Utilização}
+
+O arquivo lexer.mll é compilador usando o programa Ocamllex, cujos códigos .mll possuem uma sintaxe
+própria, otimizada para a descrição de analisadores léxicos. Para a compilação do projeto estamos usando o ocamlbuild, um projeto
+parecido com o make, que facilita o processo de compilação. 
+
+\section{Analisador Sintático}
+
+O analisador sintático foi implementado usando o Menhir, um construtor de analisadores sintáticos do tipo LR(1). Nessa fase definimos
+uma gramática e um componente para a construção de uma árvore sintática abstrata, utilizada para a construção dos elementos que irão compor a árvore, como operadores, literais e funções. O analisador recebe uma lista de tokens e retorna uma árvore sintática abstrata, construída à partir da gramática
+(Fig \ref{fig:parsing}).
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=10cm]{imagens/parsing}
+	\caption{Analisador Sintático}
+	\label{fig:parsing}
+\end{figure}
+
+\subsection{Implementação}
+
+O modelo da árvore sintática está definido no arquivo ast.ml:
+
+\lstinputlisting[label={arq:ast.ml}, language=Caml,
+caption={ast.ml}]{codigos/ocaml/ast.ml}
+
+\subsection{Utilização}
+
+
+\section{Analisador Semântico}
+
+\subsection{Implementação}
+
+\subsection{Utilização}
+
+
+\section{Intérprete}
+
+\subsection{Implementação}
+
+\subsection{Utilização}
+
+
+\section{Representação Intermediária}
+
+\subsection{Implementação}
+
+\subsection{Utilização}
+
+
+\section{Tradução para bytecode}
+
+\subsection{Implementação}
+
+\subsection{Utilização}
+
+
+\chapter{Códigos}
+
+\section{portugol e smali}
+Listagem de programas portugol e respectivas traduções para smali:
 \begin{enumerate}
 % Nano01
-\item nano01.por
-\lstinputlisting[label={arq:nano01.por}, language=Java,
-caption={nano01.por}]{codigos/Portugol/nano01.por}
+\item nano01.ptg
+\lstinputlisting[label={arq:nano01.ptg}, language=Java,
+caption={nano01.ptg}]{codigos/portugol/nano01.ptg}
 
 \item Nano01.smali
 \lstinputlisting[label={arq:Nano01.smali}, language=Java,
-caption={Nano01.smali}]{codigos/Smali/Nano01.smali}
+caption={Nano01.smali}]{codigos/smali/Nano01.smali}
 
 % Nano02
-\item nano02.por
-\lstinputlisting[label={arq:nano02.por}, language=Java,
-caption={nano02.por}]{codigos/Portugol/nano02.por}
+\item nano02.ptg
+\lstinputlisting[label={arq:nano02.ptg}, language=Java,
+caption={nano02.ptg}]{codigos/portugol/nano02.ptg}
 
 \item Nano02.smali
 \lstinputlisting[label={arq:Nano02.smali}, language=Java,
-caption={Nano02.smali}]{codigos/Smali/Nano01.smali}
+caption={Nano02.smali}]{codigos/smali/Nano01.smali}
 
 % Nano03
-\item nano03.por
-\lstinputlisting[label={arq:nano03.por}, language=Java,
-caption={nano03.por}]{codigos/Portugol/nano03.por}
+\item nano03.ptg
+\lstinputlisting[label={arq:nano03.ptg}, language=Java,
+caption={nano03.ptg}]{codigos/portugol/nano03.ptg}
 
 \item Nano03.smali
 \lstinputlisting[label={arq:Nano03.smali}, language=Java,
-caption={Nano03.smali}]{codigos/Smali/Nano03.smali}
+caption={Nano03.smali}]{codigos/smali/Nano03.smali}
 
 % Nano04
-\item nano04.por
-\lstinputlisting[label={arq:nano04.por}, language=Java,
-caption={nano04.por}]{codigos/Portugol/nano04.por}
+\item nano04.ptg
+\lstinputlisting[label={arq:nano04.ptg}, language=Java,
+caption={nano04.ptg}]{codigos/portugol/nano04.ptg}
 
 \item Nano04.smali
 \lstinputlisting[label={arq:Nano04.smali}, language=Java,
-caption={Nano04.smali}]{codigos/Smali/Nano04.smali}
+caption={Nano04.smali}]{codigos/smali/Nano04.smali}
 
 % Nano05
-\item nano05.por
-\lstinputlisting[label={arq:nano05.por}, language=Java,
-caption={nano05.por}]{codigos/Portugol/nano05.por}
+\item nano05.ptg
+\lstinputlisting[label={arq:nano05.ptg}, language=Java,
+caption={nano05.ptg}]{codigos/portugol/nano05.ptg}
 
 \item Nano05.smali
 \lstinputlisting[label={arq:Nano05.smali}, language=Java,
-caption={Nano05.smali}]{codigos/Smali/Nano05.smali}
+caption={Nano05.smali}]{codigos/smali/Nano05.smali}
 
 % Nano06
-\item nano06.por
-\lstinputlisting[label={arq:nano06.por}, language=Java,
-caption={nano06.por}]{codigos/Portugol/nano06.por}
+\item nano06.ptg
+\lstinputlisting[label={arq:nano06.ptg}, language=Java,
+caption={nano06.ptg}]{codigos/portugol/nano06.ptg}
 
 \item Nano06.smali
 \lstinputlisting[label={arq:Nano06.smali}, language=Java,
-caption={Nano06.smali}]{codigos/Smali/Nano06.smali}
+caption={Nano06.smali}]{codigos/smali/Nano06.smali}
 
 % Nano07
-\item nano07.por
-\lstinputlisting[label={arq:nano07.por}, language=Java,
-caption={nano07.por}]{codigos/Portugol/nano07.por}
+\item nano07.ptg
+\lstinputlisting[label={arq:nano07.ptg}, language=Java,
+caption={nano07.ptg}]{codigos/portugol/nano07.ptg}
 
 \item Nano07.smali
 \lstinputlisting[label={arq:Nano07.smali}, language=Java,
-caption={Nano07.smali}]{codigos/Smali/Nano07.smali}
+caption={Nano07.smali}]{codigos/smali/Nano07.smali}
 
 % Nano08
-\item nano08.por
-\lstinputlisting[label={arq:nano08.por}, language=Java,
-caption={nano08.por}]{codigos/Portugol/nano08.por}
+\item nano08.ptg
+\lstinputlisting[label={arq:nano08.ptg}, language=Java,
+caption={nano08.ptg}]{codigos/portugol/nano08.ptg}
 
 \item Nano08.smali
 \lstinputlisting[label={arq:Nano08.smali}, language=Java,
-caption={Nano08.smali}]{codigos/Smali/Nano08.smali}
+caption={Nano08.smali}]{codigos/smali/Nano08.smali}
 
 % Nano10
-\item nano10.por
-\lstinputlisting[label={arq:nano10.por}, language=Java,
-caption={nano10.por}]{codigos/Portugol/nano10.por}
+\item nano10.ptg
+\lstinputlisting[label={arq:nano10.ptg}, language=Java,
+caption={nano10.ptg}]{codigos/portugol/nano10.ptg}
 
 \item Nano10.smali
 \lstinputlisting[label={arq:Nano10.smali}, language=Java,
-caption={Nano10.smali}]{codigos/Smali/Nano10.smali}
+caption={Nano10.smali}]{codigos/smali/Nano10.smali}
 
 % Nano11
-\item nano11.por
-\lstinputlisting[label={arq:nano11.por}, language=Java,
-caption={nano11.por}]{codigos/Portugol/nano12.por}
+\item nano11.ptg
+\lstinputlisting[label={arq:nano11.ptg}, language=Java,
+caption={nano11.ptg}]{codigos/portugol/nano12.ptg}
 
 \item Nano11.smali
 \lstinputlisting[label={arq:Nano11.smali}, language=Java,
-caption={Nano11.smali}]{codigos/Smali/Nano11.smali}
+caption={Nano11.smali}]{codigos/smali/Nano11.smali}
 
 % Nano12
-\item nano12.por
-\lstinputlisting[label={arq:nano12.por}, language=Java,
-caption={nano12.por}]{codigos/Portugol/nano12.por}
+\item nano12.ptg
+\lstinputlisting[label={arq:nano12.ptg}, language=Java,
+caption={nano12.ptg}]{codigos/portugol/nano12.ptg}
 
 \item Nano12.smali
 \lstinputlisting[label={arq:Nano12.smali}, language=Java,
-caption={Nano12.smali}]{codigos/Smali/Nano12.smali}
+caption={Nano12.smali}]{codigos/smali/Nano12.smali}
 
 % Micro01
-\item micro01.por
-\lstinputlisting[label={arq:micro01.por}, language=Java,
-caption={micro01.por}]{codigos/Portugol/micro01.por}
+\item micro01.ptg
+\lstinputlisting[label={arq:micro01.ptg}, language=Java,
+caption={micro01.ptg}]{codigos/portugol/micro01.ptg}
 
 \item Micro01.smali
 \lstinputlisting[label={arq:Micro01.smali}, language=Java,
-caption={Micro01.smali}]{codigos/Smali/Micro01.smali}
+caption={Micro01.smali}]{codigos/smali/Micro01.smali}
 
 % Micro02
-\item micro02.por
-\lstinputlisting[label={arq:micro02.por}, language=Java,
-caption={micro02.por}]{codigos/Portugol/micro02.por}
+\item micro02.ptg
+\lstinputlisting[label={arq:micro02.ptg}, language=Java,
+caption={micro02.ptg}]{codigos/portugol/micro02.ptg}
 
 \item Micro02.smali
 \lstinputlisting[label={arq:Micro02.smali}, language=Java,
-caption={Micro02.smali}]{codigos/Smali/Micro02.smali}
+caption={Micro02.smali}]{codigos/smali/Micro02.smali}
 
 % Micro03
-\item micro03.por
-\lstinputlisting[label={arq:micro03.por}, language=Java,
-caption={micro03.por}]{codigos/Portugol/micro03.por}
+\item micro03.ptg
+\lstinputlisting[label={arq:micro03.ptg}, language=Java,
+caption={micro03.ptg}]{codigos/portugol/micro03.ptg}
 
 \item Micro03.smali
 \lstinputlisting[label={arq:Micro03.smali}, language=Java,
-caption={Micro03.smali}]{codigos/Smali/Micro03.smali}
+caption={Micro03.smali}]{codigos/smali/Micro03.smali}
 
 
 % Micro04
-\item micro04.por
-\lstinputlisting[label={arq:micro04.por}, language=Java,
-caption={micro04.por}]{codigos/Portugol/micro04.por}
+\item micro04.ptg
+\lstinputlisting[label={arq:micro04.ptg}, language=Java,
+caption={micro04.ptg}]{codigos/portugol/micro04.ptg}
 
 \item Micro04.smali
 \lstinputlisting[label={arq:Micro04.smali}, language=Java,
-caption={Micro04.smali}]{codigos/Smali/Micro04.smali}
+caption={Micro04.smali}]{codigos/smali/Micro04.smali}
 
 
 % Micro05
-\item micro05.por
-\lstinputlisting[label={arq:micro05.por}, language=Java,
-caption={micro05.por}]{codigos/Portugol/micro05.por}
+\item micro05.ptg
+\lstinputlisting[label={arq:micro05.ptg}, language=Java,
+caption={micro05.ptg}]{codigos/portugol/micro05.ptg}
 
 \item Micro05.smali
 \lstinputlisting[label={arq:Micro05.smali}, language=Java,
-caption={Micro05.smali}]{codigos/Smali/Micro05.smali}
+caption={Micro05.smali}]{codigos/smali/Micro05.smali}
 
 % Micro06
-\item micro06.por
-\lstinputlisting[label={arq:micro06.por}, language=Java,
-caption={micro06.por}]{codigos/Portugol/micro06.por}
+\item micro06.ptg
+\lstinputlisting[label={arq:micro06.ptg}, language=Java,
+caption={micro06.ptg}]{codigos/portugol/micro06.ptg}
 
 \item Micro06.smali
 \lstinputlisting[label={arq:Micro06.smali}, language=Java,
-caption={Micro06.smali}]{codigos/Smali/Micro06.smali}
+caption={Micro06.smali}]{codigos/smali/Micro06.smali}
 
 % Micro07
-\item micro07.por
-\lstinputlisting[label={arq:micro07.por}, language=Java,
-caption={micro07.por}]{codigos/Portugol/micro07.por}
+\item micro07.ptg
+\lstinputlisting[label={arq:micro07.ptg}, language=Java,
+caption={micro07.ptg}]{codigos/portugol/micro07.ptg}
 
 \item Micro07.smali
 \lstinputlisting[label={arq:Micro07.smali}, language=Java,
-caption={Micro07.smali}]{codigos/Smali/Micro07.smali}
+caption={Micro07.smali}]{codigos/smali/Micro07.smali}
 
 % Micro08
-\item micro08.por
-\lstinputlisting[label={arq:micro08.por}, language=Java,
-caption={micro08.por}]{codigos/Portugol/micro08.por}
+\item micro08.ptg
+\lstinputlisting[label={arq:micro08.ptg}, language=Java,
+caption={micro08.ptg}]{codigos/portugol/micro08.ptg}
 
 \item Micro08.smali
 \lstinputlisting[label={arq:Micro08.smali}, language=Java,
-caption={Micro08.smali}]{codigos/Smali/Micro08.smali}
+caption={Micro08.smali}]{codigos/smali/Micro08.smali}
 
 % Micro09
-\item micro09.por
-\lstinputlisting[label={arq:micro09.por}, language=Java,
-caption={micro09.por}]{codigos/Portugol/micro09.por}
+\item micro09.ptg
+\lstinputlisting[label={arq:micro09.ptg}, language=Java,
+caption={micro09.ptg}]{codigos/portugol/micro09.ptg}
 
 \item Micro09.smali
 \lstinputlisting[label={arq:Micro09.smali}, language=Java,
-caption={Micro09.smali}]{codigos/Smali/Micro09.smali}
+caption={Micro09.smali}]{codigos/smali/Micro09.smali}
 
 % Micro10
-\item micro10.por
-\lstinputlisting[label={arq:micro10.por}, language=Java,
-caption={micro10.por}]{codigos/Portugol/micro10.por}
+\item micro10.ptg
+\lstinputlisting[label={arq:micro10.ptg}, language=Java,
+caption={micro10.ptg}]{codigos/portugol/micro10.ptg}
 
 \item Micro10.smali
 \lstinputlisting[label={arq:Micro10.smali}, language=Java,
-caption={Micro10.smali}]{codigos/Smali/Micro10.smali}
+caption={Micro10.smali}]{codigos/smali/Micro10.smali}
 
 % Micro11
-\item micro11.por
-\lstinputlisting[label={arq:micro11.por},
-caption={micro11.por}]{codigos/Portugol/micro11.por}
+\item micro11.ptg
+\lstinputlisting[label={arq:micro11.ptg},
+caption={micro11.ptg}]{codigos/portugol/micro11.ptg}
 
 \item Micro11.smali
 \lstinputlisting[label={arq:Micro11.smali}, language=Java,
-caption={Micro11.smali}]{codigos/Smali/Micro11.smali}
+caption={Micro11.smali}]{codigos/smali/Micro11.smali}
 
 \end{enumerate}
+
+\chapter{Referências}
+
 
 \clearpage
 \addcontentsline{toc}{part}{Apêndice}

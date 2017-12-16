@@ -1,0 +1,5 @@
+
+*_build/
+*.aux *.idx *.log *.lof *.lol *.lot *.out *.toc *.synctex.gz
+*.pdf
+

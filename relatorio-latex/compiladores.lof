@@ -1,3 +1,10 @@
 \select@language {brazil}
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {1.1}{\ignorespaces Arquitetura Android\relax }}{7}{figure.caption.5}
+\contentsline {figure}{\numberline {1.2}{\ignorespaces Arquitetura Dalvik\relax }}{9}{figure.caption.6}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Arquitetura geral de um compilador\relax }}{11}{figure.caption.7}
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Analisador Sint\IeC {\'a}tico\relax }}{14}{figure.caption.8}
+\addvspace {10\p@ }
+\addvspace {10\p@ }
 \contentsfinish 
