@@ -8,5 +8,4 @@ type expressao =
 		  |ExpFloat of float pos
 		  |ExpChar of char pos
 		  |ExpBool of bool pos
-		  |ExpVar of (expressao lvalue)
-		(*  |ExpNot of expressao pos *)
+			|ExpVar of (expressao lvalue)
