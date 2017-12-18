@@ -94,6 +94,7 @@ let op_to_str op =
   | Multiplicacao -> "*"
   | Divisao       -> "/"
   | Potencia      -> "^"
+  | Modulo        -> "MOD"
 
 let rec args_to_str ats =
    match ats with
@@ -146,12 +147,12 @@ let pega_tipo exp =
   match exp with
   | ExpInt (n, t) -> t
   | ExpVar (v, t) -> t
-  | ExpOp ((op,t),_,_) -> t
-  | ExpFunCall (id, args, t) -> t
   | ExpString (s, t) -> t
   | ExpFloat (n, t) -> t
   | ExpChar (c, t) -> t
   | ExpBool (b, t) -> t
+  | ExpOp ((op,t),_,_) -> t
+  | ExpFunCall (id, args, t) -> t
   | _ -> failwith "pega_tipo: não implementado"
 
 let rec traduz_exp exp =
