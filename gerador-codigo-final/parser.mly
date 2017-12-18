@@ -71,15 +71,12 @@
 %left MULT DIVISAO MOD
 %right POTENCIA
 
-/*%nonassoc NAO*/
-
-
 %start <Sast.expressao Ast.prog> prog
 
 %%
 
 prog:
-    | da=declaracao_algoritmo VAR vdb=var_decl* fd=func_decl* stmb=stm_block  EOF { Prog (List.flatten vdb,fd,stmb) }
+    | declaracao_algoritmo VAR vdb=var_decl* fd=func_decl* stmb=stm_block  EOF { Prog (List.flatten vdb,fd,stmb) }
     ;
 
 declaracao_algoritmo:

@@ -99,6 +99,7 @@ let rec escreve_cod3 c =
   | Call (p,ats,t) -> sprintf "call %s(%s): %s\n" p (args_to_str ats) (tipo_to_str t)
   | Recebe (x,t) -> sprintf "recebe %s,%s\n" x (tipo_to_str t)
   | Local (x,t) -> sprintf "local %s,%s\n" x (tipo_to_str t)
+  | Global (x,t) -> sprintf "global %s,%s\n" x (tipo_to_str t)
   | CallFn (x,p,ats,t) ->
       sprintf "%s = call %s(%s): %s\n" (endr_to_str x) p (args_to_str ats) (tipo_to_str t)
   | Return (opcao)-> "return \n"

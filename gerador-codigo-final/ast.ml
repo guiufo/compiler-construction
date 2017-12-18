@@ -41,7 +41,6 @@ and 'expr stm_list  = Attrib of 'expr * 'expr
 		  	   |Escreval of 'expr list
 		  	   |Enquanto of 'expr * 'expr stm_list list
 
-
 and 'expr senao = 'expr stm_list list
 
 and 'expr case = CaseInt of int pos * 'expr stm_list list

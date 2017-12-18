@@ -268,6 +268,8 @@ let rec verifica_cmd amb tiporet cmd =
     let exps = List.map (infere_exp amb) exps in
     Escreval (List.map fst exps)
 
+  (* | Escolha (_,_,_) ->  espera o seguinte tipo: T.expressao A.stm_list *)
+
 and verifica_fun amb ast =
   let open A in
   match ast with
