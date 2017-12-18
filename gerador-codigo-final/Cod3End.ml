@@ -2,6 +2,7 @@ open Printf
 
 open Ast
 open Tast
+open Codigo
 
 type endereco =
      Nome of string
