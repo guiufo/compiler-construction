@@ -13,7 +13,7 @@ let num_bytes t =
 
 
 let emite_cabecalho oc arq =
-  fprintf oc "	.file	\"%s\"\n" arq
+  fprintf oc ".class public L%s\n.super Ljava/lang/Object;\n" (String.sub arq 0 ((String.length arq)-4))
 
 let rec emite_global oc cod =
   match cod with
@@ -28,7 +28,7 @@ let emite_prologo oc nome =
   fprintf oc "
 	.globl	%s
 	.type	%s, @function
-%s:
+.method public static %s([Ljava/lang/String;)V
 	pushq	%%rbp
 	movq	%%rsp, %%rbp
 "
@@ -139,10 +139,7 @@ let emite_funcao oc cod nome nargs nlocais =
      cod
 
 let emite_rodape oc =
-  fprintf oc "
-	.ident	\"GCC: (Ubuntu 6.3.0-12ubuntu2) 6.3.0 20170406\"
-	.section	.note.GNU-stack,\"\",@progbits
-"
+  fprintf oc ""
 
 let rec emite_codigo oc cod =
   match cod with
@@ -158,7 +155,7 @@ let gerador oc cod arq =
   emite_rodape oc
 
 let compila arq =
-  let oc = open_out (Filename.chop_suffix arq ".tip" ^ ".s") in
+  let oc = open_out (Filename.chop_suffix arq ".ptg" ^ ".s") in
   let cod = traduz arq in
     gerador stdout cod arq;
     close_out oc
