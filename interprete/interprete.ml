@@ -20,7 +20,7 @@ let rec posicao exp = let open S in
   | ExpFunCall ((_,pos), _) -> pos
 
 
-type classe_op = Aritmetico | Relacional | Logico  
+type classe_op = Aritmetico | Relacional | Logico
 
 let classifica op =
   let open A in
@@ -37,8 +37,8 @@ let classifica op =
   | Soma
   | Subtracao
   | Multiplicacao
-  | Divisao 
-  | Potencia 
+  | Divisao
+  | Potencia
   | Modulo -> Aritmetico
 
 let msg_erro_pos pos msg =
@@ -102,7 +102,7 @@ let rec infere_exp amb exp =
 
     let verifica_aritmetico () =
       (match tesq with
-         A.TipoInteiro 
+         A.TipoInteiro
         |A.TipoReal ->
          let _ = mesmo_tipo (snd op)
                       "O operando esquerdo eh do tipo %s mas o direito eh do tipo %s"
@@ -141,19 +141,7 @@ let rec infere_exp amb exp =
                         (nome_tipo t)
               in failwith (msg_erro_pos (snd op) msg)
       )
-  (*  and verifica_cadeia () =
-      (match tesq with
-         A.TipoCaractere ->
-         let _ = mesmo_tipo (snd op)
-                   "O operando esquerdo eh do tipo %s mas o direito eh do tipo %s"
-                   tesq tdir
-         in A.TipoCaractere (* O tipo da expressão relacional é sempre string *)
 
-       | t -> let msg = "um operador relacional nao pode ser usado com o tipo " ^
-                        (nome_tipo t)
-              in failwith (msg_erro_pos (snd op) msg)
-      )
-  *)
     in
     let op = fst op in
     let tinf = (match (classifica op) with
@@ -246,12 +234,12 @@ let rec verifica_cmd amb tiporet cmd =
 
   | Enquanto (teste, corpo) ->
     let (teste_tipo,tinf) = infere_exp amb teste in
-    let _ = mesmo_tipo (posicao teste) 
+    let _ = mesmo_tipo (posicao teste)
                       "O teste do enquanto deveria ser do tipo %s e nao %s"
                         TipoBooleano tinf in
     let corpo_tipo = List.map (verifica_cmd amb tiporet) corpo in
     Enquanto (teste_tipo, corpo_tipo)
-  
+
  | Para (var, inicio, fim, avanco, corpo) ->
     let (var_tipo, tinfv) =  infere_exp amb var in
     let (inicio_tipo,tinfi) = infere_exp amb inicio in
@@ -260,62 +248,6 @@ let rec verifica_cmd amb tiporet cmd =
 
     let corpo_tipo = List.map (verifica_cmd amb tiporet) corpo in
     Para (var_tipo,inicio_tipo,fim_tipo,avanco_tipo,corpo_tipo)
-   
- (*
-    let t0 = (match var.tipo with Some t -> t | None -> failwith "tipo" )
-    and t1 = (match inicio.tipo with Some t -> t | None -> failwith
-                    "verifica_cmd->para->t1: tipo indefinido")
-    and t2 = (match fim.tipo with Some t -> t | None -> failwith
-                    "verifica_cmd->para->t2: tipo indefinido")
-    and t3 = (match avanco with
-                    Some v -> infere_exp amb v;
-                        (match v.tipo with Some t -> t | None -> failwith
-                    "verifica_cmd->para->t2: tipo indefinido")
-                    |None -> TipoBooleano 
-                  ) in
-    begin
-      if ((t0 <> TipoInteiro ) || (t0 <> t1) || (t0 <> t2) ) then
-        msg_erro " para " cmd.pcmd " Os tipos deveraim ser iguais"
-      else
-        begin
-          ( match v3 with
-          | Some v ->
-                if (t0 <> t3) then
-                            msg_erro " para " cmd.pcmd " Os tipos deveraim ser iguais"
-
-          | None -> ignore()
-          );
-          verifica_cmd amb corpo
-        end
-    end *)
- (* | Para (var,inicio,fim,avanco, corpo) ->
-    let comando = Attrib(var,inicio) in
-      let comando_tipo = verifica_cmd amb tiporet comando in
-        let op = operador_do_for avanco in
-          let expression = S.ExpOp(op, inicio, fim) in
-            let (teste_tipo,tinf) = infere_exp amb expression in
-              let _ = mesmo_tipo (posicao fim)
-                         "O teste do para deveria ser do tip %s e nao %s"
-                          TipoBooleano tinf in
-                let comando_avanco = Attrib(var, S.ExpOp(Soma,var,avanco)) in
-                  let comando_avanco_tipo = verifica_cmd amb tiporet comando_avanco in
-                    let corpo_tipo = verifica_cmd amb tiporet corpo in
-                      let bloco = Bloco([], corpo_tipo::comando_avanco_tipo::[]) in
-                      let cmd_tipo = comando_tipo::Enquanto(teste_tipo, bloco)::[] in
-                      print_list(cmd_tipo)
-                      Bloco([], cmd_tipo)*)
-  (*| Escolha (id, caso, corpo) ->
-    let (teste_id, tinf) = infere_exp amb id in
-    let _ = mesmo_tipo (posicao id)
-                  "O teste do escolha deve ser do tipo %s e nao %s"
-                   TipoInteiro tinf in
-  *)
- (* | Bloco (decs, cmds) ->
-    let amb_bloco = Amb.novo_escopo amb in
-    let decs_tipo = List.map (verifica_dec amb_bloco) decs in
-    let _ = List.iter (analisa_dec amb_bloco) decs_tipo in
-    let cmds_tipo = List.map (verifica_cmd amb_bloco tiporet) cmds in
-    Bloco(decs_tipo, cmds_tipo)*)
 
   | Chamada exp ->
     (* Verifica o tipo de cada argumento da função 'entrada' *)
@@ -337,11 +269,6 @@ let rec verifica_cmd amb tiporet cmd =
     let exps = List.map (infere_exp amb) exps in
     Escreval (List.map fst exps)
 
-(*and operador_do_for ini =
-  let open A in
-    let zero = ExpInt( 0 ) in
-      if (ini >= zero) then MenorIgual
-      else MaiorIgual *)
 and verifica_fun amb ast =
   let open A in
   match ast with
@@ -373,7 +300,7 @@ let rec verifica_dup xs =
 let insere_declaracao_var amb dec =
   let open A in
     match dec with
-      DecVar(nome, tipo) ->  Amb.insere_local amb (fst nome) tipo
+      DecVar(nome, tipo) ->  Amb.insere_local amb (fst nome) tipo None
 
 let insere_declaracao_fun amb dec =
   let open A in
@@ -384,38 +311,10 @@ let insere_declaracao_fun amb dec =
         let nome = fst fn_id in
         Amb.insere_fun amb nome formais fn_tiporet
 
-(*let analisa_dec amb dec = 
-  let open A in
-    match dec with
-      DecVar(nome, tipo) ->  Amb.insere_local amb (fst nome) tipo
-      |FuncDecl {fn_id; fn_params; fn_tiporet;  fn_corpo} ->
-        (* Verifica se não há parâmetros duplicados *)
-        let _ = verifica_dup fn_params in
-        Amb.insere_fun amb fn_id fn_params fn_tiporet
-
-let verifica_dec amb dec = 
-    let open A in
-    match amb with
-    A.DecVar {nome; tipo}  ->
-        A.DecVar {nome; tipo}
-   | A.FuncDecl {fn_id; fn_params; fn_tiporet; fn_locais; fn_corpo} ->
-    (* Estende o ambiente global, adicionando um ambiente local *)
-    let ambfn = Amb.novo_escopo amb in
-    (* Insere os parâmetros no novo ambiente *)
-    let insere_parametro (v,t) = Amb.insere_param ambfn (fst v) t in
-    let _ = List.iter insere_parametro fn_params in
-    (* Insere as variáveis locais no novo ambiente *)
-    let insere_local = function
-        (DecVar(v,t)) -> Amb.insere_local ambfn (fst v)  t in
-    let _ = List.iter insere_local fn_locais in
-    (* Verifica cada comando presente no corpo da função usando o novo ambiente *)
-    let corpo_tipado = List.map (verifica_cmd ambfn fn_tiporet) fn_corpo in
-      A.FuncDecl {fn_id; fn_params; fn_tiporet; fn_locais; fn_corpo = corpo_tipado}
-*)
-
 (* Lista de cabeçalhos das funções pré definidas *)
 let fn_predefs = let open A in [
    ("escreva", [("x", TipoCaractere); ("y", TipoInteiro)], TipoVoid);
+   ("escreval", [("x", TipoCaractere); ("y", TipoInteiro)], TipoVoid);
    ("leia",   [("x", TipoReal); ("y", TipoInteiro)], TipoVoid)
 ]
 
@@ -423,7 +322,7 @@ let fn_predefs = let open A in [
 let declara_predefinidas amb =
   List.iter (fun (n,ps,tr) -> Amb.insere_fun amb n ps tr) fn_predefs
 
-let semantico ast =
+let interprete ast =
   (* cria ambiente global inicialmente vazio *)
   let amb_global = Amb.novo_amb [] in
   let _ = declara_predefinidas amb_global in

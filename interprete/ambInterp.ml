@@ -12,6 +12,9 @@ type t = {
   ambv : entrada Tab.tabela
 }
 
+let atualiza_var amb ch t v =
+  Tab.atualiza amb.ambv ch (EntVar (t,v))
+
 let novo_amb xs = { ambv = Tab.cria xs }
 
 let novo_escopo amb = { ambv = Tab.novo_escopo amb.ambv }
