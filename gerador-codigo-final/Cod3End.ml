@@ -101,7 +101,7 @@ let rec escreve_cod3 c =
   | Local (x,t) -> sprintf "local %s,%s\n" x (tipo_to_str t)
   | CallFn (x,p,ats,t) ->
       sprintf "%s = call %s(%s): %s\n" (endr_to_str x) p (args_to_str ats) (tipo_to_str t)
-  | Return -> "return\n"
+  | Return (opcao)-> "return \n"
   | BeginFun (id,np,nl) -> sprintf "beginFun %s,%d,%d\n" id np nl
   | EndFun -> "endFun\n\n"
   | Rotulo r -> sprintf "%s: " r
@@ -173,10 +173,10 @@ let rec traduz_cmd cmd =
   match cmd with
   | Retorne exp ->
     (match exp with
-     | None -> [Return]
+     | None -> [Return 0]
      | Some e ->
        let (endr_exp, codigo_exp) = traduz_exp e in
-       codigo_exp @ [Return]
+       codigo_exp @ [Return 0]
     )
   | Attrib (elem, exp) ->
     let (endr_exp, codigo_exp) = traduz_exp exp

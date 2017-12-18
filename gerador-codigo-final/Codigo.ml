@@ -21,7 +21,7 @@ and instrucao =
 | Recebe of string * Ast.tipo
 | Local of string * Ast.tipo
 | CallFn of endereco * string *  (endereco * Ast.tipo) list * Ast.tipo   (* x = call p,n,t *)
-| Return
+| Return of int
 | Global of string * Ast.tipo  
 | BeginFun of string * int * int      (* beginFun p,nparam, nlocais *)
 | EndFun
