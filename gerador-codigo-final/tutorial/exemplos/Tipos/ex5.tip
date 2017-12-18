@@ -1,0 +1,6 @@
+programa
+   a: inteiro;
+
+inicio
+   a := a + 1;
+fim;

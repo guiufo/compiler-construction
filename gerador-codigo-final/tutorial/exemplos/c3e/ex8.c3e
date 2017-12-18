@@ -1,0 +1,43 @@
+global a,inteiro                                                       Global ("a", TipoInt);
+global b,inteiro                                                       Global ("b", TipoInt);
+global soma,inteiro                                                    Global ("soma", TipoInt);
+
+beginFun multiplicador(2,1)                                            BeginFun ("multiplicador", 2, 1);
+   recebe m,inteiro                                                    Recebe ("m", TipoInt);
+   recebe x,inteiro                                                    Recebe ("x", TipoInt);
+   local z,inteiro                                                     Local ("z", TipoInt);
+   z := 5                                                              Copia (Nome "z", ConstInt 5);
+   t1 := z * m                                                         AtribBin (Temp 1, Nome "z", (Mult, TipoInt), Nome "m");
+   t2 := t1 * x                                                        AtribBin (Temp 2, Temp 1, (Mult, TipoInt), Nome "x");
+   z := t2                                                             Copia (Nome "z", Temp 2);
+   return z                                                            Return (Some (Nome "z"));
+endFun                                                                 EndFun;
+
+beginFun somador(3,2)                                                  BeginFun ("somador", 3, 2);
+   recebe x,inteiro                                                    Recebe ("x", TipoInt);
+   recebe y,inteiro                                                    Recebe ("y", TipoInt);
+   recebe z,inteiro                                                    Recebe ("z", TipoInt);
+   local r,inteiro                                                     Local ("r", TipoInt);
+   local m,inteiro                                                     Local ("m", TipoInt);
+   m := 1                                                              Copia (Nome "m", ConstInt 1);
+   t4 := x + y                                                         AtribBin (Temp 4, Nome "x", (Mais, TipoInt), Nome "y");
+   t5 := t4 + z                                                        AtribBin (Temp 5, Temp 4, (Mais, TipoInt), Nome "z");
+   t6 := call multiplicador((m,inteiro), (t5,inteiro)): inteiro        CallFn (Temp 6, "multiplicador", [(Nome "m", TipoInt); (Temp 5, TipoInt)], TipoInt);
+   r := t6                                                             Copia (Nome "r", Temp 6);
+   return r                                                            Return (Some (Nome "r"));
+endFun                                                                 EndFun;
+
+beginFun main(0,0)                                                     BeginFun ("main", 0, 0);
+   t7 := 2                                                             Copia (Temp 7, ConstInt 2);
+   a := t7                                                             Copia (Nome "a", Temp 7);
+   t8 := 3                                                             Copia (Temp 8, ConstInt 3);
+   b := t8                                                             Copia (Nome "b", Temp 8);
+   t9 := 1                                                             Copia (Temp 9, ConstInt 1);
+   t10 := a + t9                                                       AtribBin (Temp 10, Nome "a", (Mais, TipoInt), Temp 9);
+   t11 := 2                                                            Copia (Temp 11, ConstInt 2);
+   t12 := b + t11                                                      AtribBin (Temp 12, Nome "b", (Mais, TipoInt), Temp 11);
+   t13 := 5                                                            Copia (Temp 13, ConstInt 5);
+   t14 = call somador((t10,inteiro), (t12,inteiro), (t13,inteiro)): inteiro CallFn (Temp 14, "somador", [(Temp 10, TipoInt); (Temp 12, TipoInt); (Temp 13, TipoInt)], TipoInt);
+   soma := t14                                                         Copia (Nome "soma", Temp 14);
+   call print((a,inteiro), (b,inteiro), (soma,inteiro)): void          Call ("print", [(Nome "a", TipoInt); (Nome "b", TipoInt); (Nome "soma", TipoInt)], TipoVoid);
+endFun                                                                 EndFun

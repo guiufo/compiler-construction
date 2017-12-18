@@ -1,0 +1,16 @@
+programa
+   x, y, z: inteiro;
+
+inicio
+   x := 1;
+   y := 2;
+   
+   se (x < y) 
+   entao 
+     z := x;
+   senao
+     z := y;
+   fim se;
+   
+   z := z * z;
+fim;

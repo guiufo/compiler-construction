@@ -1,0 +1,18 @@
+programa
+   a, b, soma: inteiro;
+
+   funcao somador(x: inteiro, y: inteiro, z: inteiro) : inteiro
+   r: inteiro;
+   m: inteiro;
+   inicio
+      m := 1;
+      r := m*(x + y + z);
+      retorne r;
+   fim ;
+
+inicio
+   a := 2;
+   b := 3;
+   soma := somador(a+1, b+2, 5);
+   saida a, b, soma;
+fim;
