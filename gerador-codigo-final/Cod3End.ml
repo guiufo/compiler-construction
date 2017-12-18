@@ -173,10 +173,10 @@ let rec traduz_cmd cmd =
   match cmd with
   | Retorne exp ->
     (match exp with
-     | None -> [Return 0]
+     | None -> [Return None]
      | Some e ->
        let (endr_exp, codigo_exp) = traduz_exp e in
-       codigo_exp @ [Return 0]
+       codigo_exp @ [Return (Some endr_exp)]
     )
   | Attrib (elem, exp) ->
     let (endr_exp, codigo_exp) = traduz_exp exp
