@@ -3,42 +3,32 @@ module A = Ast
 module S = Sast
 module T = Tast
 
+exception Valor_de_retorno of T.expressao
 
-let msg_erro_pos pos msg =
-  let open Lexing in
-  let lin = pos.pos_lnum
-  and col = pos.pos_cnum - pos.pos_bol - 1 in
-  Printf.sprintf "Semantico -> linha %d, coluna %d: %s" lin col msg
-
-let msg_erro nome msg =
-  let pos = snd nome in
-  msg_erro_pos pos msg
-
-let nome_tipo t =
-  let open A in
-    match t with
-      TipoInteiro -> "inteiro"
-    | TipoCaractere -> "caractere"
-    | TipoBooleano -> "logico"
-    | TipoReal -> "real"
-    | TipoVoid -> "vazio"
-
-
-let rec posicao exp = let open S in
+let obtem_nome_tipo_var exp = let open T in
   match exp with
-  | ExpVar v -> (match v with
-      | A.Var (_,pos) -> pos
-      | A.VarElement (_,exp2) -> posicao exp2
-    )
-  (*| ExpNot (_, pos) -> pos *)
-  | ExpInt (_,pos) -> pos
-  | ExpFloat (_,pos) -> pos
-  | ExpChar (_,pos) -> pos
-  | ExpString  (_,pos) -> pos
-  | ExpBool (_,pos) -> pos
-  | ExpOp ((_,pos),_,_)  -> pos
-  | ExpFunCall ((_,pos), _) -> pos
+  | ExpVar (nome,tipo) -> (nome, tipo)
+  | _ -> failwith "obtem_nome_tipo_var: nao eh variavel"
 
+let pega_int exp =
+  match exp with
+  |  T.ExpInt (i,_) -> i
+  | _ -> failwith "pega_int: nao eh inteiro"
+
+let pega_string exp =
+  match exp with
+  |  T.ExpString (s,_) -> s
+  | _ -> failwith "pega_string: nao eh string"
+
+let pega_real exp =
+  match exp with
+  |  T.ExpFloat (s,_) -> s
+  | _ -> failwith "pega_real: nao eh real"
+
+let pega_bool exp =
+  match exp with
+  |  T.ExpBool (b,_) -> b
+  | _ -> failwith "pega_bool: nao eh booleano"
 
 type classe_op = Aritmetico | Relacional | Logico
 
@@ -46,291 +36,347 @@ let classifica op =
   let open A in
   match op with
     OuLogico
-  | ELogico
-  | XouLogico  -> Logico
+  | ELogico -> Logico
   | Menor
-  | MenorIgual
   | Maior
-  | MaiorIgual
   | Igual
+  | MaiorIgual
+  | MenorIgual
   | Diferente -> Relacional
-  | Soma
-  | Subtracao
+  | Mais
+  | Menos
   | Multiplicacao
-  | Divisao
-  | Potencia
-  | Modulo -> Aritmetico
+  | Divisao -> Aritmetico
 
-let mesmo_tipo pos msg tinf tdec =
-  if tinf <> tdec
-  then
-    let msg = Printf.sprintf msg (nome_tipo tinf) (nome_tipo tdec) in
-    failwith (msg_erro_pos pos msg)
 
-let rec infere_exp amb exp =
+let rec interpreta_exp amb exp =
+  let open A in
+  let open T in
   match exp with
-    S.ExpInt n    -> (T.ExpInt (fst n, A.TipoInteiro),       A.TipoInteiro)
-  | S.ExpString s -> (T.ExpString (fst s, A.TipoCaractere), A.TipoCaractere)
-  | S.ExpBool b   -> (T.ExpBool (fst b, A.TipoBooleano),     A.TipoBooleano)
-  | S.ExpFloat f  -> (T.ExpFloat (fst f, A.TipoReal), A.TipoReal)
-  | S.ExpChar c   -> (T.ExpChar (fst c, A.TipoCaractere), A.TipoCaractere)
-  | S.ExpVar v ->
-    (match v with
-       A.Var nome ->
-       (* Tenta encontrar a definição da variável no escopo local, se não      *)
-       (* encontar tenta novamente no escopo que engloba o atual. Prossegue-se *)
-       (* assim até encontrar a definição em algum escopo englobante ou até    *)
-       (* encontrar o escopo global. Se em algum lugar for encontrado,         *)
-       (* devolve-se a definição. Em caso contrário, devolve uma exceção       *)
-       let id = fst nome in
-         (try (match (Amb.busca amb id) with
-               | Amb.EntVar tipo -> (T.ExpVar (A.Var nome, tipo), tipo)
-               | Amb.EntFun _ ->
-                 let msg = "nome de funcao usado como nome de variavel: " ^ id in
-                  failwith (msg_erro nome msg)
-             )
-          with Not_found ->
-                 let msg = "A variavel " ^ id ^ " nao foi declarada" in
-                 failwith (msg_erro nome msg)
+  | ExpVoid
+  | ExpInt _
+  | ExpString _
+  | ExpFloat _
+  | ExpBool _   -> exp
+  | ExpVar _ ->
+    let (id,tipo) = obtem_nome_tipo_var exp in
+    (* Tenta encontrar o valor da variável no escopo local, se não      *)
+    (* encontrar, tenta novamente no escopo que engloba o atual. Prossegue-se *)
+    (* assim até encontrar o valor em algum escopo englobante ou até    *)
+    (* encontrar o escopo global. Se em algum lugar for encontrado,         *)
+    (* devolve-se o valor. Em caso contrário, devolve uma exceção       *)
+    (match (Amb.busca amb id) with
+     | Amb.EntVar (tipo, v) ->
+       (match v with
+        | None -> failwith ("variável nao inicializada: " ^ id)
+        | Some valor -> valor
+       )
+     |  _ -> failwith "interpreta_exp: expvar"
+    )
+  | ExpOp ((op,top), (esq, tesq), (dir,tdir)) ->
+    let  vesq = interpreta_exp amb esq
+    and vdir = interpreta_exp amb dir in
+
+    let interpreta_aritmetico () =
+      (match tesq with
+       | TipoInt ->
+         (match op with
+          | Mais ->     ExpInt (pega_int vesq + pega_int vdir, top)
+          | Menos -> ExpInt (pega_int vesq - pega_int vdir, top)
+          | Multiplicacao ->     ExpInt (pega_int vesq * pega_int vdir, top)
+          | Divisao  ->      ExpInt (pega_int vesq / pega_int vdir, top)
+	  | Mod -> ExpInt (pega_int vesq mod pega_int vdir, top)
+          | _ -> failwith "interpreta_aritmetico"
          )
-     | _ -> failwith "infere_exp: não implementado"
+       | TipoReal ->
+         (match op with
+          | Mais ->     ExpFloat (pega_real vesq +. pega_real vdir, top)
+          | Menos -> ExpFloat (pega_real vesq -. pega_real vdir, top)
+          | Multiplicacao ->     ExpFloat (pega_real vesq *. pega_real vdir, top)
+          | Divisao  ->      ExpFloat (pega_real vesq /. pega_real vdir, top)
+          | _ -> failwith "interpreta_aritmetico"
+         )
+       | _ -> failwith "interpreta_aritmetico"
+      )
+
+    and interpreta_relacional () =
+      (match tesq with
+       | TipoInt ->
+         (match op with
+          | Menor -> ExpBool (pega_int vesq < pega_int vdir, top)
+          | Maior  -> ExpBool (pega_int vesq > pega_int vdir, top)
+          | Igual   -> ExpBool (pega_int vesq == pega_int vdir, top)
+          | Diferente   -> ExpBool (pega_int vesq != pega_int vdir, top)
+          | MenorIgual -> ExpBool (pega_int vesq <= pega_int vdir, top)
+          | MaiorIgual -> ExpBool (pega_int vesq >= pega_int vdir, top)
+          | _ -> failwith "interpreta_relacional"
+         )
+       | TipoString ->
+         (match op with
+          | Menor -> ExpBool (pega_string vesq < pega_string vdir, top)
+          | Maior  -> ExpBool (pega_string vesq > pega_string vdir, top)
+          | Igual   -> ExpBool (pega_string vesq = pega_string vdir, top)
+          | Diferente   -> ExpBool (pega_string vesq != pega_string vdir, top)
+          | MenorIgual -> ExpBool (pega_string vesq <= pega_string vdir, top)
+          | MaiorIgual -> ExpBool (pega_string vesq >= pega_string vdir, top)
+          | _ -> failwith "interpreta_relacional"
+         )
+       | TipoReal ->
+         (match op with
+          | Menor -> ExpBool (pega_real vesq < pega_real vdir, top)
+          | Maior  -> ExpBool (pega_real vesq > pega_real vdir, top)
+          | Igual   -> ExpBool (pega_real vesq == pega_real vdir, top)
+          | Difer   -> ExpBool (pega_real vesq != pega_real vdir, top)
+          | MenorIgual -> ExpBool (pega_real vesq <= pega_real vdir, top)
+          | MaiorIgual -> ExpBool (pega_real vesq >= pega_real vdir, top)
+          | _ -> failwith "interpreta_relacional"
+         )
+       | TipoBool ->
+         (match op with
+          | Menor -> ExpBool (pega_bool vesq < pega_bool vdir, top)
+          | Maior  -> ExpBool (pega_bool vesq > pega_bool vdir, top)
+          | Igual   -> ExpBool (pega_bool vesq == pega_bool vdir, top)
+          | Difer   -> ExpBool (pega_bool vesq != pega_bool vdir, top)
+          | MenorIgual -> ExpBool (pega_bool vesq <= pega_bool vdir, top)
+          | MaiorIgual -> ExpBool (pega_bool vesq >= pega_bool vdir, top)
+          | _ -> failwith "interpreta_relacional"
+         )
+       | _ ->  failwith "interpreta_relacional"
+      )
+
+    and interpreta_logico () =
+      (match tesq with
+       | TipoBool ->
+         (match op with
+          | OuLogico -> ExpBool (pega_bool vesq || pega_bool vdir, top)
+          | ELogico ->   ExpBool (pega_bool vesq && pega_bool vdir, top)
+          | _ ->  failwith "interpreta_logico"
+         )
+       | _ ->  failwith "interpreta_logico"
+      )
+
+    in
+    let valor = (match (classifica op) with
+          Aritmetico -> interpreta_aritmetico ()
+        | Relacional -> interpreta_relacional ()
+        | Logico -> interpreta_logico ()
+      )
+    in
+      valor
+
+  | ExpFunCall (id, args, tipo) ->
+    let open Amb in
+    ( match (Amb.busca amb id) with
+      | Amb.EntFun {tipo_fn; formais; locais; corpo} ->
+           (* Interpreta cada um dos argumentos *)
+           let vargs = List.map (interpreta_exp amb) args in
+           (* Associa os argumentos aos parâmetros formais *)
+           let vformais = List.map2 (fun (n,t) v -> (n, t, Some v)) formais vargs
+           in interpreta_fun amb id vformais locais corpo
+      | _ -> failwith "interpreta_exp: expchamada"
     )
 
-  | S.ExpOp (op, esq, dir) ->
-    let (esq, tesq) = infere_exp amb esq
-    and (dir, tdir) = infere_exp amb dir in
-
-    let verifica_aritmetico () =
-      (match tesq with
-         A.TipoInteiro
-        |A.TipoReal ->
-         let _ = mesmo_tipo (snd op)
-                      "O operando esquerdo eh do tipo %s mas o direito eh do tipo %s"
-                      tesq tdir
-         in tesq (* O tipo da expressão aritmética como um todo *)
-
-       | t -> let msg = "um operador aritmetico nao pode ser usado com o tipo " ^
-                        (nome_tipo t)
-         in failwith (msg_erro_pos (snd op) msg)
-      )
-
-    and verifica_relacional () =
-      (match tesq with
-         A.TipoInteiro
-       | A.TipoReal
-       | A.TipoCaractere ->
-         let _ = mesmo_tipo (snd op)
-                   "O operando esquerdo eh do tipo %s mas o direito eh do tipo %s"
-                   tesq tdir
-         in A.TipoBooleano (* O tipo da expressão relacional é sempre booleano *)
-
-       | t -> let msg = "um operador relacional nao pode ser usado com o tipo " ^
-                        (nome_tipo t)
-         in failwith (msg_erro_pos (snd op) msg)
-      )
-
-    and verifica_logico () =
-      (match tesq with
-         A.TipoBooleano ->
-         let _ = mesmo_tipo (snd op)
-                   "O operando esquerdo eh do tipo %s mas o direito eh do tipo %s"
-                   tesq tdir
-         in A.TipoBooleano (* O tipo da expressão lógica é sempre booleano *)
-
-       | t -> let msg = "um operador logico nao pode ser usado com o tipo " ^
-                        (nome_tipo t)
-              in failwith (msg_erro_pos (snd op) msg)
-      )
-
-    in
-    let op = fst op in
-    let tinf = (match (classifica op) with
-          Aritmetico -> verifica_aritmetico ()
-        | Relacional -> verifica_relacional ()
-        | Logico -> verifica_logico ()
-      )
-    in
-      (T.ExpOp ((op,tinf), (esq, tesq), (dir, tdir)), tinf)
-
-  | S.ExpFunCall (nome, args) ->
-     let rec verifica_parametros ags ps fs =
-        match (ags, ps, fs) with
-         (a::ags), (p::ps), (f::fs) ->
-            let _ = mesmo_tipo (posicao a)
-                     "O parametro eh do tipo %s mas deveria ser do tipo %s" p f
-            in verifica_parametros ags ps fs
-       | [], [], [] -> ()
-       | _ -> failwith (msg_erro nome "Numero incorreto de parametros")
-     in
-     let id = fst nome in
-     try
-       begin
-         let open Amb in
-
-         match (Amb.busca amb id) with
-         (* verifica se 'nome' está associada a uma função *)
-           Amb.EntFun {tipo_fn; formais} ->
-           (* Infere o tipo de cada um dos argumentos *)
-           let argst = List.map (infere_exp amb) args
-           (* Obtem o tipo de cada parâmetro formal *)
-           and tipos_formais = List.map snd formais in
-           (* Verifica se o tipo de cada argumento confere com o tipo declarado *)
-           (* do parâmetro formal correspondente.                               *)
-           let _ = verifica_parametros args (List.map snd argst) tipos_formais
-            in (T.ExpFunCall (id, (List.map fst argst), tipo_fn), tipo_fn)
-         | Amb.EntVar _ -> (* Se estiver associada a uma variável, falhe *)
-           let msg = id ^ " eh uma variavel e nao uma funcao" in
-           failwith (msg_erro nome msg)
-       end
-     with Not_found ->
-       let msg = "Nao existe a funcao de nome " ^ id in
-       failwith (msg_erro nome msg)
-
-let rec verifica_cmd amb tiporet cmd =
+and interpreta_fun amb fn_nome fn_formais fn_locais fn_corpo =
   let open A in
-  match cmd with
-    Retorne exp ->
-    (match exp with
-     (* Se a função não retornar nada, verifica se ela foi declarada como void *)
-       None ->
-       let _ = mesmo_tipo (Lexing.dummy_pos)
-                   "O tipo retornado eh %s mas foi declarado como %s"
-                   TipoVoid tiporet
-       in Retorne None
-     | Some e ->
-       (* Verifica se o tipo inferido para a expressão de retorno confere com o *)
-       (* tipo declarado para a função.                                         *)
-           let (e1,tinf) = infere_exp amb e in
-           let _ = mesmo_tipo (posicao e)
-                              "O tipo retornado eh %s mas foi declarado como %s"
-                              tinf tiporet
-           in Retorne (Some e1)
-      )
-  | Se (teste, entao, senao) ->
-    let (teste1,tinf) = infere_exp amb teste in
-    (* O tipo inferido para a expressão 'teste' do condicional deve ser booleano *)
-    let _ = mesmo_tipo (posicao teste)
-             "O teste do if deveria ser do tipo %s e nao %s"
-             TipoBooleano tinf in
-    (* Verifica a validade de cada comando do bloco 'então' *)
-    let entao1 = List.map (verifica_cmd amb tiporet) entao in
-    (* Verifica a validade de cada comando do bloco 'senão', se houver *)
-    let senao1 =
-        match senao with
-          None -> None
-        | Some bloco -> Some (List.map (verifica_cmd amb tiporet) bloco)
-     in
-     Se (teste1, entao1, senao1)
-
-  | Attrib (elem, exp) ->
-    (* Infere o tipo da expressão no lado direito da atribuição *)
-    let (exp,  tdir) = infere_exp amb exp
-    (* Faz o mesmo para o lado esquerdo *)
-    and (elem1, tesq) = infere_exp amb elem in
-    (* Os dois tipos devem ser iguais *)
-    let _ = mesmo_tipo (posicao elem)
-                       "Atribuicao com tipos diferentes: %s = %s" tesq tdir
-    in Attrib (elem1, exp)
-
-  | Enquanto (teste, corpo) ->
-    let (teste_tipo,tinf) = infere_exp amb teste in
-    let _ = mesmo_tipo (posicao teste)
-                      "O teste do enquanto deveria ser do tipo %s e nao %s"
-                        TipoBooleano tinf in
-    let corpo_tipo = List.map (verifica_cmd amb tiporet) corpo in
-    Enquanto (teste_tipo, corpo_tipo)
-
- | Para (var, inicio, fim, avanco, corpo) ->
-    let (var_tipo, tinfv) =  infere_exp amb var in
-    let (inicio_tipo,tinfi) = infere_exp amb inicio in
-    let (fim_tipo,tinff) = infere_exp amb fim in
-    let (avanco_tipo,tinfa) = infere_exp amb avanco in
-
-    let corpo_tipo = List.map (verifica_cmd amb tiporet) corpo in
-    Para (var_tipo,inicio_tipo,fim_tipo,avanco_tipo,corpo_tipo)
-
-  | Chamada exp ->
-    (* Verifica o tipo de cada argumento da função 'entrada' *)
-    let (exp,tinf) = infere_exp amb exp in
-    Chamada exp
-
-  | Leia exps ->
-    (* Verifica o tipo de cada argumento da função 'entrada' *)
-    let exps = List.map (infere_exp amb) exps in
-    Leia (List.map fst exps)
-
-  | Escreva exps ->
-    (* Verifica o tipo de cada argumento da função 'saida' *)
-    let exps = List.map (infere_exp amb) exps in
-    Escreva (List.map fst exps)
-
-  | Escreval exps ->
-    (* Verifica o tipo de cada argumento da função 'saida' *)
-    let exps = List.map (infere_exp amb) exps in
-    Escreval (List.map fst exps)
-
-and verifica_fun amb ast =
-  let open A in
-  match ast with
-    A.FuncDecl {fn_id; fn_params; fn_tiporet; fn_locais; fn_corpo} ->
-    (* Estende o ambiente global, adicionando um ambiente local *)
-    let ambfn = Amb.novo_escopo amb in
-    (* Insere os parâmetros no novo ambiente *)
-    let insere_parametro (v,t) = Amb.insere_param ambfn (fst v) t in
-    let _ = List.iter insere_parametro fn_params in
-    (* Insere as variáveis locais no novo ambiente *)
-    let insere_local = function
-        (DecVar(v,t)) -> Amb.insere_local ambfn (fst v)  t in
+ (* Estende o ambiente global, adicionando um ambiente local *)
+  let ambfn = Amb.novo_escopo amb in
+   let insere_local  d =
+    match d with
+      (DecVar (v,t)) -> Amb.insere_local ambfn (fst v)  t None
+  in
+  (* Associa os argumentos aos parâmetros e insere no novo ambiente *)
+  let insere_parametro (n,t,v) = Amb.insere_param ambfn n t v in
+  let _ = List.iter insere_parametro fn_formais in
+  (* Insere as variáveis locais no novo ambiente *)
     let _ = List.iter insere_local fn_locais in
-    (* Verifica cada comando presente no corpo da função usando o novo ambiente *)
-    let corpo_tipado = List.map (verifica_cmd ambfn fn_tiporet) fn_corpo in
-      A.FuncDecl {fn_id; fn_params; fn_tiporet; fn_locais; fn_corpo = corpo_tipado}
+    (* Interpreta cada comando presente no corpo da função usando o novo
+       ambiente *)
+  try
+    let _ = List.iter (interpreta_cmd ambfn) fn_corpo in T.ExpVoid
+    with
+       Valor_de_retorno expret -> expret
 
+and interpreta_cmd amb cmd =
+  let open A in
+  let open T in
+  match cmd with
+    CmdRetorno exp ->
+    (* Levantar uma exceção foi necessária pois, pela semântica do comando de
+        retorno, sempre que ele for encontrado em uma função, a computação
+        deve parar retornando o valor indicado, sem realizar os demais comandos.
+    *)
+    (match exp with
+     (* Se a função não retornar nada, então retorne ExpVoid *)
+       None -> raise (Valor_de_retorno ExpVoid)
+     | Some e ->
+       (* Avalia a expressão e retorne o resultado *)
+       let e1 = interpreta_exp amb e in
+       raise (Valor_de_retorno e1)
+    )
 
-let rec verifica_dup xs =
-  match xs with
-    [] -> []
-  | (nome,t)::xs ->
-    let id = fst nome in
-    if (List.for_all (fun (n,t) -> (fst n) <> id) xs)
-    then (id, t) :: verifica_dup xs
-    else let msg = "Parametro duplicado " ^ id in
-      failwith (msg_erro nome msg)
+  | CmdSe (teste, entao, senao) ->
+    let teste1 = interpreta_exp amb teste in
+    (match teste1 with
+       ExpBool (true,_) ->
+       (* Interpreta cada comando do bloco 'então' *)
+       List.iter (interpreta_cmd amb) entao
+     | _ ->
+       (* Interpreta cada comando do bloco 'senão', se houver *)
+       (match senao with
+          None -> ()
+        | Some bloco -> List.iter (interpreta_cmd amb) bloco
+       )
+    )
+
+  | CmdAtrib (elem, exp) ->
+    (* Interpreta o lado direito da atribuição *)
+    let exp = interpreta_exp amb exp
+    (* Faz o mesmo para o lado esquerdo *)
+    and (elem1,tipo) = obtem_nome_tipo_var elem in
+    Amb.atualiza_var amb elem1 tipo (Some exp)
+
+| CmdFor (cmd1, exp, cmd2) ->
+    (match cmd1 with
+      | CmdAtrib(v, exp1) ->
+        (* Interpreta o lado direito da atribuição *)
+        let exp2 = interpreta_exp amb exp1
+        (* Faz o mesmo para o lado esquerdo *)
+        and (elem1,tipo) = obtem_nome_tipo_var v in
+        Amb.atualiza_var amb elem1 tipo (Some exp2);
+
+        (match exp2 with
+          | ExpInt (val1, _) ->
+          (match (interpreta_exp amb exp) with
+            | ExpInt (val2, _) ->
+                              for var = val1 to val2 do
+
+(*                                let expAux = interpreta_exp amb exp1;*)
+
+                                (* Faz o mesmo para o lado esquerdo *)
+(*                                and (elemAux,tipoAux) = obtem_nome_tipo_var v in
+                                Amb.atualiza_var amb elemAux tipoAux (Some (ExpInt (var, )))
+*)
+                                interpreta_cmd amb cmd2
+                              done
+            | _ -> failwith "segunda expressao invalida"
+          )
+          | _ -> failwith "expressao invalida"
+        )
+      | _ -> failwith "comando invalido"
+    )
+
+  | CmdWhile (exp, cmd) ->
+    (match (interpreta_exp amb exp) with
+      | ExpBool (v, _) ->
+        (let value = ref v in
+          while !value do
+            List.iter (interpreta_cmd amb) cmd;
+            match (interpreta_exp amb exp) with
+            | ExpBool(v, _) -> value := v
+            | _ -> failwith "Condicao nao satisfeita"
+          done
+        )
+      | _ -> failwith "Condicao invalida"
+    )
+
+  | CmdChamada exp -> ignore( interpreta_exp amb exp)
+
+  | CmdEntrada exps ->
+    (* Obtem os nomes e os tipos de cada um dos argumentos *)
+    let nts = List.map (obtem_nome_tipo_var) exps in
+    let leia_var (nome,tipo) =
+      let valor =
+        (match tipo with
+         | A.TipoInt    -> T.ExpInt    (read_int (),  tipo)
+         | A.TipoReal    -> T.ExpReal    (read_float (),  tipo)
+         | A.TipoString -> T.ExpString (read_line (), tipo)
+         | _ -> failwith "leia_var: nao implementado"
+        )
+      in  Amb.atualiza_var amb nome tipo (Some valor)
+    in
+    (* Lê o valor para cada argumento e atualiza o ambiente *)
+    List.iter leia_var nts
+
+  | CmdEntradaln exps ->
+    (* Obtem os nomes e os tipos de cada um dos argumentos *)
+    let nts = List.map (obtem_nome_tipo_var) exps in
+    let leia_var (nome,tipo) =
+      let valor =
+        (match tipo with
+         | A.TipoInt    -> T.ExpInt    (read_int (),  tipo)
+         | A.TipoReal    -> T.ExpReal    (read_float (),  tipo)
+         | A.TipoString -> T.ExpString (read_line (), tipo)
+         | _ -> failwith "leia_var: nao implementado"
+        )
+      in  Amb.atualiza_var amb nome tipo (Some valor)
+    in
+    (* Lê o valor para cada argumento e atualiza o ambiente *)
+    List.iter leia_var nts
+
+  | CmdSaida exps ->
+    (* Interpreta cada argumento da função 'saida' *)
+    let exps = List.map (interpreta_exp amb) exps in
+    let imprima exp =
+      (match exp with
+       | T.ExpInt (n,_) ->      let _ = print_int n in print_string " "
+       | T.ExpString (s,_) -> let _ = print_string s in print_string " "
+       | T.ExpReal (r, _) -> let _ = print_float r in print_string " "
+       | T.ExpBool (b,_) ->
+         let _ = print_string (if b then "true" else "false")
+         in print_string " "
+       | _ -> failwith "imprima: nao implementado"
+      )
+    in
+    List.iter imprima exps
+
+  | CmdSaidaln exps ->
+    (* Interpreta cada argumento da função 'saida' *)
+    let exps = List.map (interpreta_exp amb) exps in
+    let imprima exp =
+      (match exp with
+       | T.ExpInt (n,_) ->      let _ = print_int n in print_string " "
+       | T.ExpString (s,_) -> let _ = print_string s in print_string " "
+       | T.ExpReal (r, _) -> let _ = print_float r in print_string " "
+       | T.ExpBool (b,_) ->
+         let _ = print_string (if b then "true" else "false")
+         in print_string " "
+       | _ -> failwith "imprima: nao implementado"
+      )
+    in
+    let _ = List.iter imprima exps in
+    print_newline ()
 
 let insere_declaracao_var amb dec =
-  let open A in
     match dec with
-      DecVar(nome, tipo) ->  Amb.insere_local amb (fst nome) tipo
+        A.DecVar (nome, tipo) ->  Amb.insere_local amb (fst nome) tipo None
 
 let insere_declaracao_fun amb dec =
   let open A in
     match dec with
-      FuncDecl {fn_id; fn_params; fn_tiporet;  fn_corpo} ->
-        (* Verifica se não há parâmetros duplicados *)
-        let formais = verifica_dup fn_params in
-        let nome = fst fn_id in
-        Amb.insere_fun amb nome formais fn_tiporet
+      Funcao {fn_nome; fn_prms; fn_tiporeturn; fn_locais; fn_cmds} ->
+        let nome = fst fn_nome in
+        let formais = List.map (fun (n,t) -> ((fst n), t)) fn_prms in
+        Amb.insere_fun amb nome formais fn_locais fn_tiporeturn fn_cmds
 
 (* Lista de cabeçalhos das funções pré definidas *)
 let fn_predefs = let open A in [
-   ("escreva", [("x", TipoCaractere); ("y", TipoInteiro)], TipoVoid);
-   ("escreval", [("x", TipoCaractere); ("y", TipoInteiro)], TipoVoid);
-   ("leia",   [("x", TipoReal); ("y", TipoInteiro)], TipoVoid)
+    ("read", [("x", TipoInt); ("y", TipoInt)], TipoVoid, []);
+    ("write",     [("x", TipoInt); ("y", TipoInt)], TipoVoid, []);
+    ("readln", [("x", TipoInt); ("y", TipoInt)], TipoVoid, []);
+    ("writeln",     [("x", TipoInt); ("y", TipoInt)], TipoVoid, []);
 ]
 
 (* insere as funções pré definidas no ambiente global *)
 let declara_predefinidas amb =
-  List.iter (fun (n,ps,tr) -> Amb.insere_fun amb n ps tr) fn_predefs
+  List.iter (fun (n,ps,tr,c) -> Amb.insere_fun amb n ps [] tr c) fn_predefs
 
 let interprete ast =
   (* cria ambiente global inicialmente vazio *)
   let amb_global = Amb.novo_amb [] in
   let _ = declara_predefinidas amb_global in
-  let (A.Prog (decs_globais, decs_funs, corpo)) = ast in
+  let (A.Programa (ident,decs_funs,decs_globais,corpo)) = ast in
   let _ = List.iter (insere_declaracao_var amb_global) decs_globais in
   let _ = List.iter (insere_declaracao_fun amb_global) decs_funs in
-  (* Verificação de tipos nas funções *)
-  let decs_funs = List.map (verifica_fun amb_global) decs_funs in
-  (* Verificação de tipos na função principal *)
-  let corpo = List.map (verifica_cmd amb_global A.TipoVoid) corpo in
-     (A.Prog (decs_globais, decs_funs, corpo),  amb_global)
+  (* Interpreta a função principal *)
+  let resultado = List.iter (interpreta_cmd amb_global) corpo in
+  resultado

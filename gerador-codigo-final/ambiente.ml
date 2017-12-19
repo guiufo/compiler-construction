@@ -1,12 +1,13 @@
 module Tab = Tabsimb
 module A = Ast
+module T = Tast
 
 type entrada_fn = { tipo_fn:  A.tipo;
                     formais: (string * A.tipo) list;
 }
 
 type entrada =  EntFun of entrada_fn
-             |  EntVar of A.tipo
+             |  EntVar of A.tipo * (T.expressao option)
 
 type t = {
   ambv : entrada Tab.tabela
