@@ -7,6 +7,7 @@ type expressao = ExpVar of (expressao lvalue) * tipo
 		  |ExpInt of int * tipo
 		  |ExpFloat of float * tipo
 		  |ExpChar of char * tipo
-		  |ExpBool of bool * tipo
+			|ExpBool of bool * tipo
+			|ExpVoid
 		(*  |ExpNot of expressao * tipo *)
 

@@ -36,6 +36,7 @@ let classifica op =
   let open A in
   match op with
     OuLogico
+  | XouLogico
   | ELogico -> Logico
   | Menor
   | Maior
@@ -43,9 +44,11 @@ let classifica op =
   | MaiorIgual
   | MenorIgual
   | Diferente -> Relacional
-  | Mais
-  | Menos
+  | Soma
+  | Subtracao
   | Multiplicacao
+  | Potencia
+  | Modulo
   | Divisao -> Aritmetico
 
 
@@ -81,8 +84,8 @@ let rec interpreta_exp amb exp =
       (match tesq with
        | TipoInt ->
          (match op with
-          | Mais ->     ExpInt (pega_int vesq + pega_int vdir, top)
-          | Menos -> ExpInt (pega_int vesq - pega_int vdir, top)
+          | Soma ->     ExpInt (pega_int vesq + pega_int vdir, top)
+          | Subtracao -> ExpInt (pega_int vesq - pega_int vdir, top)
           | Multiplicacao ->     ExpInt (pega_int vesq * pega_int vdir, top)
           | Divisao  ->      ExpInt (pega_int vesq / pega_int vdir, top)
 	  | Mod -> ExpInt (pega_int vesq mod pega_int vdir, top)
@@ -90,8 +93,8 @@ let rec interpreta_exp amb exp =
          )
        | TipoReal ->
          (match op with
-          | Mais ->     ExpFloat (pega_real vesq +. pega_real vdir, top)
-          | Menos -> ExpFloat (pega_real vesq -. pega_real vdir, top)
+          | Soma ->     ExpFloat (pega_real vesq +. pega_real vdir, top)
+          | Subtracao -> ExpFloat (pega_real vesq -. pega_real vdir, top)
           | Multiplicacao ->     ExpFloat (pega_real vesq *. pega_real vdir, top)
           | Divisao  ->      ExpFloat (pega_real vesq /. pega_real vdir, top)
           | _ -> failwith "interpreta_aritmetico"
@@ -200,7 +203,7 @@ and interpreta_cmd amb cmd =
   let open A in
   let open T in
   match cmd with
-    CmdRetorno exp ->
+    Retorno exp ->
     (* Levantar uma exceção foi necessária pois, pela semântica do comando de
         retorno, sempre que ele for encontrado em uma função, a computação
         deve parar retornando o valor indicado, sem realizar os demais comandos.
@@ -214,7 +217,7 @@ and interpreta_cmd amb cmd =
        raise (Valor_de_retorno e1)
     )
 
-  | CmdSe (teste, entao, senao) ->
+  | Se (teste, entao, senao) ->
     let teste1 = interpreta_exp amb teste in
     (match teste1 with
        ExpBool (true,_) ->
@@ -228,16 +231,16 @@ and interpreta_cmd amb cmd =
        )
     )
 
-  | CmdAtrib (elem, exp) ->
+  | Attrib (elem, exp) ->
     (* Interpreta o lado direito da atribuição *)
     let exp = interpreta_exp amb exp
     (* Faz o mesmo para o lado esquerdo *)
     and (elem1,tipo) = obtem_nome_tipo_var elem in
     Amb.atualiza_var amb elem1 tipo (Some exp)
 
-| CmdFor (cmd1, exp, cmd2) ->
+| Para (cmd1, exp, cmd2) ->
     (match cmd1 with
-      | CmdAtrib(v, exp1) ->
+      | Attrib(v, exp1) ->
         (* Interpreta o lado direito da atribuição *)
         let exp2 = interpreta_exp amb exp1
         (* Faz o mesmo para o lado esquerdo *)
@@ -265,7 +268,7 @@ and interpreta_cmd amb cmd =
       | _ -> failwith "comando invalido"
     )
 
-  | CmdWhile (exp, cmd) ->
+  | Enquanto (exp, cmd) ->
     (match (interpreta_exp amb exp) with
       | ExpBool (v, _) ->
         (let value = ref v in
@@ -279,16 +282,16 @@ and interpreta_cmd amb cmd =
       | _ -> failwith "Condicao invalida"
     )
 
-  | CmdChamada exp -> ignore( interpreta_exp amb exp)
+  | Chamada exp -> ignore( interpreta_exp amb exp)
 
-  | CmdEntrada exps ->
+  | Leia exps ->
     (* Obtem os nomes e os tipos de cada um dos argumentos *)
     let nts = List.map (obtem_nome_tipo_var) exps in
     let leia_var (nome,tipo) =
       let valor =
         (match tipo with
          | A.TipoInt    -> T.ExpInt    (read_int (),  tipo)
-         | A.TipoReal    -> T.ExpReal    (read_float (),  tipo)
+         | A.TipoReal    -> T.ExpFloat (read_float (),  tipo)
          | A.TipoString -> T.ExpString (read_line (), tipo)
          | _ -> failwith "leia_var: nao implementado"
         )
@@ -297,23 +300,7 @@ and interpreta_cmd amb cmd =
     (* Lê o valor para cada argumento e atualiza o ambiente *)
     List.iter leia_var nts
 
-  | CmdEntradaln exps ->
-    (* Obtem os nomes e os tipos de cada um dos argumentos *)
-    let nts = List.map (obtem_nome_tipo_var) exps in
-    let leia_var (nome,tipo) =
-      let valor =
-        (match tipo with
-         | A.TipoInt    -> T.ExpInt    (read_int (),  tipo)
-         | A.TipoReal    -> T.ExpReal    (read_float (),  tipo)
-         | A.TipoString -> T.ExpString (read_line (), tipo)
-         | _ -> failwith "leia_var: nao implementado"
-        )
-      in  Amb.atualiza_var amb nome tipo (Some valor)
-    in
-    (* Lê o valor para cada argumento e atualiza o ambiente *)
-    List.iter leia_var nts
-
-  | CmdSaida exps ->
+  | Escreva exps ->
     (* Interpreta cada argumento da função 'saida' *)
     let exps = List.map (interpreta_exp amb) exps in
     let imprima exp =
@@ -329,14 +316,14 @@ and interpreta_cmd amb cmd =
     in
     List.iter imprima exps
 
-  | CmdSaidaln exps ->
+  | Escreval exps ->
     (* Interpreta cada argumento da função 'saida' *)
     let exps = List.map (interpreta_exp amb) exps in
     let imprima exp =
       (match exp with
        | T.ExpInt (n,_) ->      let _ = print_int n in print_string " "
        | T.ExpString (s,_) -> let _ = print_string s in print_string " "
-       | T.ExpReal (r, _) -> let _ = print_float r in print_string " "
+       | T.ExpFloat (r, _) -> let _ = print_float r in print_string " "
        | T.ExpBool (b,_) ->
          let _ = print_string (if b then "true" else "false")
          in print_string " "
