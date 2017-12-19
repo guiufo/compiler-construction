@@ -1,10 +1,12 @@
-algoritmo "nano06"
+Algoritmo
 
-var
-	n : inteiro;
-inicio
+Var
 
-	n <- 1 - 2;
-	escreva(n);
+   n : inteiro
+   
+Inicio
 
-fimalgoritmo
+n <- 1 - 2
+escreva(n)
+
+Fimalgoritmo

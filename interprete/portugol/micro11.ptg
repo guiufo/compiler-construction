@@ -1,39 +1,39 @@
-algoritmo "micro11" 
+Algoritmo
 
-{ FunÃ§Ã£o : recebe um numero e verifica se o numero e positivo, nulo
+Var
+numero, x: inteiro
 
-ou negativo com auxilio de uma funcaoo.
-
-}
-
-var
-	numero: inteiro;
-	x: inteiro;
 funcao verifica(n: inteiro) : inteiro
-	var
-		res: inteiro;
-	inicio
-	se n > 0 entao
-		res <- 1;
-	senao se n < 0
-	      entao res <- -1;
-		  senao res <- 0;
-		  fimse
-	fimse
-	retorne res;
-fimfuncao 
+Var
+res: inteiro
 
-inicio
+Inicio
 
-	escreva("Digite um numero: ");
-	leia(numero);
-	x <- verifica(numero);
-	se x = 1
-	entao escreval("Numero positivo");
-	senao se x = 0
-		  entao escreval("Zero");
-		  senao escreval("NÃºmero negativo");
-		  fimse
-	fimse
- 
-fimalgoritmo
+      se n > 0 entao
+         res <- 1
+      senao
+         se n < 0 entao
+            res <- 2
+         senao
+            res <- 0
+         fimse
+      fimse
+      retorne res
+fimfuncao
+
+Inicio
+
+      escreva("Digite um número: ")
+      leia(numero)
+      x <- verifica(numero)
+      se x = 1 entao
+         escreva("Número positivo")
+      senao
+         se x = 0 entao
+            escreva("Zero")
+         senao
+            escreva("Número negativo")
+         fimse
+      fimse
+
+Fimalgoritmo

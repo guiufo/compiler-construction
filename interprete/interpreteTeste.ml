@@ -252,27 +252,6 @@ let verifica_tipos nome =
     Some (Some ast) -> semantico ast
   | _ -> failwith "Nada a fazer!\n"
 
-(* Para compilar:
-     ocamlbuild -use-ocamlfind -use-menhir -menhir "menhir --table" -package menhirLib semanticoTest.byte
-  
-   Para usar, entre no ocaml 
-
-     rlwrap ocaml
-
-   e se desejar ver apenas a árvore sintática que sai do analisador sintático, digite
-
-     parse_arq "exemplos/ex2.tip";;
-
-   Depois, para ver a saída do analisador semântico já com a árvore anotada com 
-   o tipos, digite:
-
-   verifica_tipos "exemplos/ex2.tip";;
-
-   Note que o analisador semântico está retornando também o ambiente global. Se 
-   quiser separá-los, digite:
-
-   let (arv, amb) = verifica_tipos "exemplos/ex2.tip";;
-
-    
-
- *)
+let interprete nome =
+  let tast,amb = verifica_tipos nome in
+  Interprete.interprete tast

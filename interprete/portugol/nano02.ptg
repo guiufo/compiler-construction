@@ -1,5 +1,9 @@
-algoritmo "nano02"
-var
-	n : inteiro;
-inicio
-fimalgoritmo
+Algoritmo
+
+Var
+
+   n : inteiro
+   
+Inicio
+
+Fimalgoritmo

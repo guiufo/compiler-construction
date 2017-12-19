@@ -1,21 +1,20 @@
-algoritmo "micro03"
+Algoritmo
 
-{FunÃ§Ã£o : FaÃ§a um algoritmo que receba um nÃºmero e diga se este
-nÃºmero estÃ¡ no intervalo entre 100 e 200.
-}
+Var
+numero : inteiro
 
-var
-	numero: inteiro;
-inicio
-	escreva("Digite um nÃºmero: ");
-	leia(numero);
-	se numero >= 100 entao
-		se numero <= 200 entao
-			escreval("O nÃºmero estÃ¡ no intervalo entre 100 e 200");
-		senao
-			escreval("O nÃºmero nÃ£o estÃ¡ no intervalo entre 100 e 200");
-		fimse
-	senao
-		escreval("O nÃºmero nÃ£o estÃ¡ no intervalo entre 100 e 200");
-	fimse
-fimalgoritmo
+Inicio
+
+      escreva("Digite um número: ")
+      leia(numero)
+      se numero >= 100 entao
+         se numero <= 200 entao
+            escreva("O número está no intervalo entre 100 e 200")
+         senao
+            escreva("O número não está no intervalo entre 100 e 200")
+         fimse
+      senao
+         escreva("O número não está no intervalo entre 100 e 200")
+      fimse
+
+Fimalgoritmo

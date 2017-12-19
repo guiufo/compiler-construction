@@ -1,6 +1,11 @@
-algoritmo "nano03"
-var
-	n : inteiro;
-inicio
-	n <- 1 - 2;
-fimalgoritmo
+Algoritmo
+
+Var
+
+   n : inteiro
+   
+Inicio
+
+n<-1
+
+Fimalgoritmo

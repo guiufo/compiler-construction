@@ -1,17 +1,17 @@
-algoritmo "nano10"
+Algoritmo
 
-var
+Var
 
-	n,m : inteiro;
+   n,m : inteiro
+   
+Inicio
 
-inicio
+      n <- 1
+      m <- 2
+      se n = m entao
+           escreva(n)
+      senao
+           escreva(0)
+      fimse
 
-	n <- 1;
-	m <- 2;
-	se n = m entao
-		escreva(n);
-	senao
-		escreva(0);
-	fimse
-
-fimalgoritmo
+Fimalgoritmo

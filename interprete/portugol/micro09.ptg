@@ -1,24 +1,25 @@
-algoritmo "micro09"
+Algoritmo
 
-var
-	preco, venda, novo_preco: real;
-inicio
-	escreva("Digite o pre√ßo: ");
-	leia(preco);
-	escreva("Digite a venda: ");
-	leia(venda);
-	
-	se (venda < 500.0) ou (preco < 30.0) entao 
-		novo_preco <- preco + 10.0/100.0 * preco;
-	senao se (venda >= 500.0 e venda < 1200.0) ou
-			(preco >= 30.0 e preco < 80.0) entao 
-				novo_preco <- preco + 15.0/100.0 * preco;
-		  		senao se (venda >= 1200.0 ou preco >= 80.0 )entao 
-		  			novo_preco <- preco - 20.0/100.0 * preco;
-				fimse
-		  fimse
-	fimse
+Var
+preco, venda, novo_preco : real
 
-	escreval ("O novo pre√ßo √© ", novo_preco);
+Inicio
 
-fimalgoritmo
+      escreva("Digite o preÁo: ")
+      leia(preco)
+      escreva("Digite a venda: ")
+      leia(venda)
+      se (venda < 500.0) OU (preco < 30.0) entao
+         novo_preco <-  preco + 10.0/100.0 * preco
+      senao
+         se (venda >= 500.0 E venda < 1200.0) OU (preco >= 30.0 E preco < 80.0) entao
+              novo_preco <-  preco + 15.0/100.0 * preco
+         senao
+              se venda >= 1200.0 OU preco >= 80.0 entao
+                 novo_preco <- preco - 20.0/100.0 * preco
+              fimse
+         fimse
+      fimse
+escreva("O novo preÁo È ", novo_preco)
+
+Fimalgoritmo

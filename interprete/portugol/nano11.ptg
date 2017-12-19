@@ -1,17 +1,21 @@
-algoritmo "nano11"
+Algoritmo
 
-var
-	n, m, x : inteiro;
-inicio
-	n <- 1;
+Var
 
-	m <- 2;
+   n,m,x : inteiro
+   
+Inicio
 
-	x <- 5;
+      n <- 1
+      m <- 2
+      x <- 5
+      enquanto x > n faca
+          se n = m entao
+             escreva(n)
+          senao
+             escreva(0)
+          fimse
+          x <- x - 1
+      fimenquanto
 
-	enquanto x > n faca
-		n <- n + m;
-		escreva(n);
-	fimenquanto
-
-fimalgoritmo
+Fimalgoritmo

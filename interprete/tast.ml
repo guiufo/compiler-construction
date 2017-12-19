@@ -1,12 +1,12 @@
 open Ast
 
-type expressao = ExpVar of (expressao lvalue) * tipo
-		  |ExpOp of (op * tipo ) * (expressao * tipo) * (expressao * tipo)
-		  |ExpFunCall of identificador * expressao fargs * tipo 
-		  |ExpString of string * tipo
-		  |ExpInt of int * tipo
-		  |ExpFloat of float * tipo
-		  |ExpChar of char * tipo
-		  |ExpBool of bool * tipo
-		(*  |ExpNot of expressao * tipo *)
+type expressao = ExpVar of (expressao variavel) * tipo
+              | ExpInt of int * tipo
+	      | ExpReal of float * tipo
+              | ExpCaractere of string * tipo
+  	      | ExpVoid
+              | ExpLogico of bool * tipo
+              | ExpOp of (oper * tipo) * (expressao * tipo) * (expressao * tipo)
+              | ExpChamada of ident * (expressao expressoes) * tipo
+
 

@@ -7,7 +7,7 @@ open ErroSint (* nome do módulo contendo as mensagens de erro *)
 exception Erro_Sintatico of string
     
 module S = MenhirLib.General (* Streams *)
-module I = Parser.MenhirInterpreter
+module I = Sintatico.MenhirInterpreter
 
 let posicao lexbuf =
     let pos = lexbuf.lex_curr_p in
@@ -31,23 +31,22 @@ let estado checkpoint : int =
 
 let sucesso v = Some v
 
-let falha lexbuf (checkpoint : Ast.prog I.checkpoint) =
+let falha lexbuf (checkpoint : Ast.programa I.checkpoint) =
   let estado_atual = estado checkpoint in
   let msg = message estado_atual in
   raise (Erro_Sintatico (Printf.sprintf "%d - %s.\n"
                                       (Lexing.lexeme_start lexbuf) msg))
 
 let loop lexbuf resultado =
-  let fornecedor = I.lexer_lexbuf_to_supplier Lexer.token lexbuf in
+  let fornecedor = I.lexer_lexbuf_to_supplier Lexico.token lexbuf in
   I.loop_handle sucesso (falha lexbuf) fornecedor resultado
-
 
 
 let parse_com_erro lexbuf =
   try
-    Some (loop lexbuf (Parser.Incremental.prog lexbuf.lex_curr_p))
+    Some (loop lexbuf (Sintatico.Incremental.programa lexbuf.lex_curr_p))
   with
-  | Lexer.Erro msg ->
+  | Lexico.Erro msg ->
      printf "Erro lexico na %s:\n\t%s\n" (posicao lexbuf) msg;
      None
   | Erro_Sintatico msg ->
@@ -68,7 +67,5 @@ let parse_arq nome =
 
 
 (* Para compilar:
-     menhir -v --list-errors sintatico.mly > sintatico.msg
-     menhir -v --list-errors sintatico.mly --compile-errors sintatico.msg > erroSint.ml
      ocamlbuild -use-menhir sintaticoTest.byte
  *)

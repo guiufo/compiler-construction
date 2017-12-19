@@ -1,28 +1,18 @@
-algoritmo "micro04"
+Algoritmo
+Var
+x, num, intervalo : inteiro
 
-{
+Inicio
 
-Função: Ler 5 números e ao final informar quantos número(s)
+      para x de 1 ate 5 faca
+           escreva("Digite um n�mero: ")
+           leia(num)
+           se num >= 10 entao
+              se num <= 150 entao
+                 intervalo <-  intervalo + 1
+              fimse
+           fimse
+      fimpara
+      escreva("Ao total, foram digitados ",intervalo," n�meros no intervalo entre 10 e 150")
 
-est(á)ão no intervalo entre 10 (inclusive) e 150 (inclusive).
-
-}
-
-var
-	x, num, intervalo: inteiro;
-inicio
-	para x de 1 ate 5 passo 1 faca
-		escreva("Digite um número: ");
-		leia(num);
-		se num >= 10 entao
-			se num <= 150 entao
-				intervalo <- intervalo + 1;
-			fimse
-		fimse
-	fimpara
-
-	escreval("Ao total, foram digitados ",intervalo," números no
-
-	intervalo entre 10 e 150");
-
-fimalgoritmo
+Fimalgoritmo

@@ -1,37 +1,30 @@
-algoritmo "micro07"
+Algoritmo
 
-{ Função : Faça um algoritmo que receba N números e mostre
+Var
+programa, numero : inteiro
+opc : caractere
 
-positivo, negativo ou zero para cada número.
+Inicio
 
-}
+      programa <- 1
+      enquanto programa = 1 faca
+           escreva("Digite um n�mero: ")
+           leia(numero)
+           se numero > 0 entao
+              escreva("Positivo")
+           senao
+              se numero = 0 entao
+                 escreva("O n�mero � igual a 0")
+              fimse
+              se numero < 0 entao
+                 escreva("Negativo")
+              fimse
+           fimse
+           escreva("Deseja finalizar? (S/N) ")
+           leia(opc)
+           se opc = "S" entao
+              programa <- 0
+           fimse
+      fimenquanto
 
-var
-	programa, numero: inteiro;
-	opc: caractere;
-inicio
-	programa <- 1;
-	enquanto programa = 1 faca
-		escreva("Digite um número: ");
-		leia(numero);
-		se numero > 0 entao
-			escreval("Positivo");
-		senao
-			se numero = 0 entao
-				escreval("O número é igual a 0");
-			fimse
-			se numero < 0 entao
-
-				escreval("Negativo");
-			fimse
-		fimse
-
-		escreva("Deseja finalizar? (S/N) ");
-
-		leia(opc);
-
-		se opc = 'S' entao
-			programa <- 0;
-		fimse
-	fimenquanto
-fimalgoritmo
+Fimalgoritmo

@@ -1,8 +1,0 @@
-algoritmo "erroSintFunc"
-
-funcao teste() : real 
-inicio 
-fimfuncao
-
-inicio
-fimalgoritmo

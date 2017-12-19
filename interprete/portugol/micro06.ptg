@@ -1,30 +1,23 @@
-algoritmo "micro06"
+Algoritmo
 
-{ Função : Faça um algoritmo que leia um número de 1 a 5 e o
+Var
+numero : inteiro
 
-escreva por extenso. Caso o usuário digite um número que
+Inicio
 
-não esteja neste intervalo, exibir mensagem: número inválido.
+      escreva("Digite um n�mero de 1 a 5: ")
+      leia(numero)
+      escolha numero
+          caso 1
+             escreva("Um")
+          caso 2
+             escreva("Dois")
+          caso 3
+             escreva("Tr�s")
+          caso 4
+             escreva("Quatro")
+          caso 5
+             escreva("Cinco")
+          fimescolha
 
-}
-
-var
-	numero: inteiro;
-inicio
-	escreva("Digite um número de 1 a 5: ");
-	leia(numero);
-	escolha numero
-		caso 1
-			escreval("Um");
-		caso 2
-			escreval("Dois");
-		caso 3
-			escreval("Três");
-		caso 4
-			escreval("Quatro");
-		caso 5
-			escreval("Cinco");
-		outrocaso
-			escreval("Número Inválido!!!");
-	fimescolha
-fimalgoritmo
+Fimalgoritmo

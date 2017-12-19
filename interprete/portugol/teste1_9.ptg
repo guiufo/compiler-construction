@@ -2,12 +2,12 @@ Algoritmo
 
 Var
 
-   n : inteiro
+   n : real
    
 Inicio
 
-      n <- 1
-      se n = 1 entao
+      n <- 1.0 + 1.0 / 2.0
+      se n = 1.0 entao
            escreva(n)
       senao
            escreva(0)
