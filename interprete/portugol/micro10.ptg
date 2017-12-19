@@ -19,12 +19,12 @@ fimfuncao
 
 Inicio
 
-      escreva("Digite um número: ")
+      escreva("Digite um numero: ")
       leia(numero)
       fat := fatorial(numero)
       escreva("O fatorial de ")
       escreva(numero)
-      escreva(" é ")
+      escreva(" e ")
       escreva(fat)
 
 Fimalgoritmo

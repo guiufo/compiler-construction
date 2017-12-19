@@ -17,12 +17,12 @@ inicio
 fimfuncao
 
 inicio
-	escreva("Digite um número: ");
+	escreva("Digite um numero: ");
 	leia(numero);
 	fat <- fatorial(numero);
 	escreva("O fatorial de ");
 	escreva(numero);
-	escreva(" é ");
+	escreva(" e ");
 	escreval(fat);
 fimalgoritmo
 
