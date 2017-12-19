@@ -1,6 +1,7 @@
 type entrada_fn = {
   tipo_fn:  Ast.tipo;
   formais: (string * Ast.tipo) list;
+  locais:  Ast.var_decl;
   corpo: Tast.expressao Ast.statements
 }
 

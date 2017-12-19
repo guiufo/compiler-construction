@@ -1,6 +1,6 @@
 open Ast
 
-type expressao = ExpVar of (expressao lvalue) * tipo
+type expressao = ExpVar of identificador pos
 		  |ExpOp of (op * tipo ) * (expressao * tipo) * (expressao * tipo)
 		  |ExpFunCall of identificador * expressao fargs * tipo 
 		  |ExpString of string * tipo

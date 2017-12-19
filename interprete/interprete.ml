@@ -82,13 +82,13 @@ let rec interpreta_exp amb exp =
 
     let interpreta_aritmetico () =
       (match tesq with
-       | TipoInt ->
+       | TipoInteiro ->
          (match op with
           | Soma ->     ExpInt (pega_int vesq + pega_int vdir, top)
           | Subtracao -> ExpInt (pega_int vesq - pega_int vdir, top)
           | Multiplicacao ->     ExpInt (pega_int vesq * pega_int vdir, top)
           | Divisao  ->      ExpInt (pega_int vesq / pega_int vdir, top)
-	  | Mod -> ExpInt (pega_int vesq mod pega_int vdir, top)
+	  | Modulo -> ExpInt (pega_int vesq mod pega_int vdir, top)
           | _ -> failwith "interpreta_aritmetico"
          )
        | TipoReal ->
@@ -104,7 +104,7 @@ let rec interpreta_exp amb exp =
 
     and interpreta_relacional () =
       (match tesq with
-       | TipoInt ->
+       | TipoInteiro ->
          (match op with
           | Menor -> ExpBool (pega_int vesq < pega_int vdir, top)
           | Maior  -> ExpBool (pega_int vesq > pega_int vdir, top)
@@ -114,7 +114,7 @@ let rec interpreta_exp amb exp =
           | MaiorIgual -> ExpBool (pega_int vesq >= pega_int vdir, top)
           | _ -> failwith "interpreta_relacional"
          )
-       | TipoString ->
+       | TipoCaractere ->
          (match op with
           | Menor -> ExpBool (pega_string vesq < pega_string vdir, top)
           | Maior  -> ExpBool (pega_string vesq > pega_string vdir, top)
@@ -129,17 +129,17 @@ let rec interpreta_exp amb exp =
           | Menor -> ExpBool (pega_real vesq < pega_real vdir, top)
           | Maior  -> ExpBool (pega_real vesq > pega_real vdir, top)
           | Igual   -> ExpBool (pega_real vesq == pega_real vdir, top)
-          | Difer   -> ExpBool (pega_real vesq != pega_real vdir, top)
+          | Diferente   -> ExpBool (pega_real vesq != pega_real vdir, top)
           | MenorIgual -> ExpBool (pega_real vesq <= pega_real vdir, top)
           | MaiorIgual -> ExpBool (pega_real vesq >= pega_real vdir, top)
           | _ -> failwith "interpreta_relacional"
          )
-       | TipoBool ->
+       | TipoBooleano ->
          (match op with
           | Menor -> ExpBool (pega_bool vesq < pega_bool vdir, top)
           | Maior  -> ExpBool (pega_bool vesq > pega_bool vdir, top)
           | Igual   -> ExpBool (pega_bool vesq == pega_bool vdir, top)
-          | Difer   -> ExpBool (pega_bool vesq != pega_bool vdir, top)
+          | Diferente   -> ExpBool (pega_bool vesq != pega_bool vdir, top)
           | MenorIgual -> ExpBool (pega_bool vesq <= pega_bool vdir, top)
           | MaiorIgual -> ExpBool (pega_bool vesq >= pega_bool vdir, top)
           | _ -> failwith "interpreta_relacional"
@@ -149,7 +149,7 @@ let rec interpreta_exp amb exp =
 
     and interpreta_logico () =
       (match tesq with
-       | TipoBool ->
+       | TipoBooleano ->
          (match op with
           | OuLogico -> ExpBool (pega_bool vesq || pega_bool vdir, top)
           | ELogico ->   ExpBool (pega_bool vesq && pega_bool vdir, top)
@@ -203,7 +203,7 @@ and interpreta_cmd amb cmd =
   let open A in
   let open T in
   match cmd with
-    Retorno exp ->
+    Retorne exp ->
     (* Levantar uma exceção foi necessária pois, pela semântica do comando de
         retorno, sempre que ele for encontrado em uma função, a computação
         deve parar retornando o valor indicado, sem realizar os demais comandos.
@@ -238,7 +238,7 @@ and interpreta_cmd amb cmd =
     and (elem1,tipo) = obtem_nome_tipo_var elem in
     Amb.atualiza_var amb elem1 tipo (Some exp)
 
-| Para (cmd1, exp, cmd2) ->
+(* | Para (cmd1, exp, cmd2) ->
     (match cmd1 with
       | Attrib(v, exp1) ->
         (* Interpreta o lado direito da atribuição *)
@@ -266,7 +266,7 @@ and interpreta_cmd amb cmd =
           | _ -> failwith "expressao invalida"
         )
       | _ -> failwith "comando invalido"
-    )
+    ) *)
 
   | Enquanto (exp, cmd) ->
     (match (interpreta_exp amb exp) with
@@ -290,9 +290,9 @@ and interpreta_cmd amb cmd =
     let leia_var (nome,tipo) =
       let valor =
         (match tipo with
-         | A.TipoInt    -> T.ExpInt    (read_int (),  tipo)
+         | A.TipoInteiro    -> T.ExpInt    (read_int (),  tipo)
          | A.TipoReal    -> T.ExpFloat (read_float (),  tipo)
-         | A.TipoString -> T.ExpString (read_line (), tipo)
+         | A.TipoCaractere -> T.ExpString (read_line (), tipo)
          | _ -> failwith "leia_var: nao implementado"
         )
       in  Amb.atualiza_var amb nome tipo (Some valor)
@@ -347,10 +347,10 @@ let insere_declaracao_fun amb dec =
 
 (* Lista de cabeçalhos das funções pré definidas *)
 let fn_predefs = let open A in [
-    ("read", [("x", TipoInt); ("y", TipoInt)], TipoVoid, []);
-    ("write",     [("x", TipoInt); ("y", TipoInt)], TipoVoid, []);
-    ("readln", [("x", TipoInt); ("y", TipoInt)], TipoVoid, []);
-    ("writeln",     [("x", TipoInt); ("y", TipoInt)], TipoVoid, []);
+    ("read", [("x", TipoInteiro); ("y", TipoInteiro)], TipoVoid, []);
+    ("write",     [("x", TipoInteiro); ("y", TipoInteiro)], TipoVoid, []);
+    ("readln", [("x", TipoInteiro); ("y", TipoInteiro)], TipoVoid, []);
+    ("writeln",     [("x", TipoInteiro); ("y", TipoInteiro)], TipoVoid, []);
 ]
 
 (* insere as funções pré definidas no ambiente global *)

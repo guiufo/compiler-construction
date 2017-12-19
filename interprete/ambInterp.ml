@@ -4,13 +4,13 @@ module T = Tast
 
 type entrada_fn = {
   tipo_fn:  A.tipo;
-  formais: (A.identificador * A.tipo) list;
+  formais: (A.ident * A.tipo) list;
+  locais:  A.declaracoes;
   corpo: T.expressao A.comandos
 }
 
-type entrada = EntFun of entrada_fn
-            |  EntVar of A.tipo  * (T.expressao option)
-
+type entrada =  EntFun of entrada_fn
+                        |  EntVar of A.tipo * (T.expressao option)
 
 type t = {
   ambv : entrada Tab.tabela
@@ -31,8 +31,9 @@ let insere_local amb nome t v =
 let insere_param amb nome t v =
   Tab.insere amb.ambv nome (EntVar (t,v))
 
-let insere_fun amb nome params resultado corpo =
+let insere_fun amb nome params locais resultado corpo =
   let ef = EntFun { tipo_fn = resultado;
                     formais = params;
+                    locais = locais;
                     corpo = corpo }
   in Tab.insere amb.ambv nome ef
