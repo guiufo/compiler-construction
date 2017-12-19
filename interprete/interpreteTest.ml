@@ -301,7 +301,7 @@ let verifica_tipos nome =
     Some (Some ast) -> semantico ast
   | _ -> failwith "Nada a fazer!\n"
 
-  let interprete nome =
+let interprete nome =
     let tast,amb = verifica_tipos nome in
     Interprete.interprete tast
 

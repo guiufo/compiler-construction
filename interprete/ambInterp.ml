@@ -9,7 +9,7 @@ type entrada_fn = {
 }
 
 type entrada = EntFun of entrada_fn
-            |  EntVar of A.tipo * (T.expressao option)
+            |  EntVar of A.tipo  * (T.expressao option)
 
 
 type t = {

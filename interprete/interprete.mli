@@ -1,1 +1,1 @@
-val semantico : (Sast.expressao Ast.prog) -> Tast.expressao Ast.prog * Ambiente.t 
+val interprete :  Tast.expressao Ast.prog -> unit

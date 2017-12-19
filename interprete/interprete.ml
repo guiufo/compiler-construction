@@ -1,7 +1,27 @@
-module Amb = Ambiente
+module Amb = AmbInterp
 module A = Ast
 module S = Sast
 module T = Tast
+
+
+let msg_erro_pos pos msg =
+  let open Lexing in
+  let lin = pos.pos_lnum
+  and col = pos.pos_cnum - pos.pos_bol - 1 in
+  Printf.sprintf "Semantico -> linha %d, coluna %d: %s" lin col msg
+
+let msg_erro nome msg =
+  let pos = snd nome in
+  msg_erro_pos pos msg
+
+let nome_tipo t =
+  let open A in
+    match t with
+      TipoInteiro -> "inteiro"
+    | TipoCaractere -> "caractere"
+    | TipoBooleano -> "logico"
+    | TipoReal -> "real"
+    | TipoVoid -> "vazio"
 
 
 let rec posicao exp = let open S in
@@ -40,26 +60,6 @@ let classifica op =
   | Divisao
   | Potencia
   | Modulo -> Aritmetico
-
-let msg_erro_pos pos msg =
-  let open Lexing in
-  let lin = pos.pos_lnum
-  and col = pos.pos_cnum - pos.pos_bol - 1 in
-  Printf.sprintf "Semantico -> linha %d, coluna %d: %s" lin col msg
-
-let msg_erro nome msg =
-  let pos = snd nome in
-  msg_erro_pos pos msg
-
-let nome_tipo t =
-  let open A in
-    match t with
-      TipoInteiro -> "inteiro"
-    | TipoCaractere -> "caractere"
-    | TipoBooleano -> "logico"
-    | TipoReal -> "real"
-    | TipoVoid -> "vazio"
-
 
 let mesmo_tipo pos msg tinf tdec =
   if tinf <> tdec
