@@ -6,7 +6,6 @@ let () =
 #use "topfind";;
 #require "menhirLib";;
 #directory "_build";;
-#load "parser.cmo";;
 #load "lexer.cmo";;
 #load "ast.cmo";;
 #load "sast.cmo";;
@@ -14,10 +13,13 @@ let () =
 #load "tabsimb.cmo";;
 #load "ambiente.cmo";;
 #load "semantico.cmo";;
-#load "semanticoTest.cmo";;
+#load "parser.cmo";;
+#load "ambInterp.cmo";;
+#load "interprete.cmo";;
+#load "interpreteTeste.cmo";;
 
 open Ast
 open Ambiente
-open SemanticoTest
+open InterpreteTeste
 
 

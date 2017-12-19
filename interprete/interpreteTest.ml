@@ -301,6 +301,10 @@ let verifica_tipos nome =
     Some (Some ast) -> semantico ast
   | _ -> failwith "Nada a fazer!\n"
 
+  let interprete nome =
+    let tast,amb = verifica_tipos nome in
+    Interprete.interprete tast
+
 (* Para compilar:
      ocamlbuild -use-ocamlfind -use-menhir -menhir "menhir --table" -package menhirLib semanticoTest.byte
   

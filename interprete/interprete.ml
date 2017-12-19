@@ -300,7 +300,7 @@ let rec verifica_dup xs =
 let insere_declaracao_var amb dec =
   let open A in
     match dec with
-      DecVar(nome, tipo) ->  Amb.insere_local amb (fst nome) tipo None
+      DecVar(nome, tipo) ->  Amb.insere_local amb (fst nome) tipo
 
 let insere_declaracao_fun amb dec =
   let open A in
