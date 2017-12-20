@@ -1,0 +1,27 @@
+(fig) life of android app
+https://image.slidesharecdn.com/artvsdalvik-141017103318-conversion-gate01/95/art-aot-vs-dalvik-jit-4-638.jpg?cb=1477301741
+
+(fig) android architecture
+http://www.hub4tech.com/sites/default/files/tutorial/android/android_architecture.png
+
+(fig) dalvik architecture
+https://image.slidesharecdn.com/artvsdalvik-141017103318-conversion-gate01/95/art-aot-vs-dalvik-jit-13-638.jpg?cb=1477301741
+
+(fig) compiler architecture
+https://www.cs.uaf.edu/~cs631/notes/phases.gif?w=240?w=240
+
+(fig) sintático
+http://www.pling.org.uk/cs/lsaimg/parsingpipeline.png
+
+(fig) semântico
+
+
+Programas e Links
+
+(prog) Menhir
+
+(prog) Ocamllexer
+
+
+
+

@@ -1,5 +1,3 @@
-package com.hello.android.hello;
-
 public class Nano07 {
     public static void main(String[] args) {
         // write your code here
